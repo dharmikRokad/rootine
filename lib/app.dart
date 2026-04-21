@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'features/habits/presentation/home_page.dart';
+import 'features/auth/presentation/auth_gate_page.dart';
 
 class HabitzApp extends StatelessWidget {
   const HabitzApp({super.key});
@@ -32,7 +32,7 @@ class HabitzApp extends StatelessWidget {
           color: Colors.white,
         ),
       ),
-      home: const HabitsHomePage(),
+      home: const AuthGatePage(),
     );
   }
 }

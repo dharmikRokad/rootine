@@ -9,19 +9,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:habitz/app.dart';
-import 'package:habitz/bootstrap.dart';
+import 'package:habitz/features/auth/presentation/auth_gate_page.dart';
 
 void main() {
   testWidgets('Habitz app renders', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [firebaseEnabledProvider.overrideWithValue(false)],
-        child: const HabitzApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: HabitzApp()));
+    await tester.pumpAndSettle();
 
-    expect(find.text('Habitz'), findsOneWidget);
-    expect(find.text('Track'), findsOneWidget);
-    expect(find.text('Stats'), findsOneWidget);
+    expect(find.byType(AuthGatePage), findsOneWidget);
   });
 }

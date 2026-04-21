@@ -3,30 +3,22 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../bootstrap.dart';
 import '../../../core/date_helpers.dart';
 import '../../auth/application/auth_controller.dart';
 import '../data/firestore_habit_repository.dart';
 import '../data/habit_repository.dart';
-import '../data/in_memory_habit_repository.dart';
 import '../domain/habit.dart';
 import '../domain/habit_completion.dart';
 import '../domain/habit_detail_stats.dart';
 import '../domain/habit_stats.dart';
 
-final _inMemoryRepositoryProvider = Provider<InMemoryHabitRepository>(
-  (_) => InMemoryHabitRepository(),
-);
-
 final habitRepositoryProvider = Provider<HabitRepository>((ref) {
-  final firebaseEnabled = ref.watch(firebaseEnabledProvider);
   final user = ref.watch(authStateProvider).valueOrNull;
-
-  if (firebaseEnabled && user != null) {
-    return FirestoreHabitRepository(FirebaseFirestore.instance, user.uid);
+  if (user == null) {
+    throw StateError('User must be authenticated before loading habits.');
   }
 
-  return ref.watch(_inMemoryRepositoryProvider);
+  return FirestoreHabitRepository(FirebaseFirestore.instance, user.uid);
 });
 
 final selectedDateProvider = StateProvider<DateTime>((_) {

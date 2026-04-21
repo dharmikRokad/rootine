@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../bootstrap.dart';
 import '../../../core/date_helpers.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/habits_controller.dart';
@@ -25,57 +24,35 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final firebaseEnabled = ref.watch(firebaseEnabledProvider);
-    final authBootstrap = ref.watch(ensureSignedInProvider);
     final user = ref.watch(authStateProvider).valueOrNull;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Habitz'),
         actions: [
-          if (firebaseEnabled)
-            Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: Chip(
-                avatar: const Icon(Icons.cloud_done, size: 18),
-                label: Text(_authLabel(user)),
-              ),
-            )
-          else
-            const Padding(
-              padding: EdgeInsets.only(right: 6),
-              child: Chip(
-                avatar: Icon(Icons.cloud_off, size: 18),
-                label: Text('Local mode'),
-              ),
+          Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: Chip(
+              avatar: const Icon(Icons.cloud_done, size: 18),
+              label: Text(_authLabel(user)),
             ),
+          ),
           IconButton(
             tooltip: 'Archived habits',
             icon: const Icon(Icons.archive_outlined),
             onPressed: () => _openArchivedHabits(context),
           ),
-          if (firebaseEnabled)
-            PopupMenuButton<String>(
-              tooltip: 'Account',
-              onSelected: (value) async {
-                if (value == 'google') {
-                  await ref.read(authActionsProvider).signInWithGoogle();
-                }
-                if (value == 'signOut') {
-                  await ref.read(authActionsProvider).signOutToAnonymous();
-                }
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem(
-                  value: 'google',
-                  child: Text('Sign in with Google'),
-                ),
-                PopupMenuItem(
-                  value: 'signOut',
-                  child: Text('Sign out to guest'),
-                ),
-              ],
-            ),
+          PopupMenuButton<String>(
+            tooltip: 'Account',
+            onSelected: (value) async {
+              if (value == 'signOut') {
+                await ref.read(authActionsProvider).signOut();
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(value: 'signOut', child: Text('Sign out')),
+            ],
+          ),
           IconButton(
             tooltip: 'Today',
             icon: const Icon(Icons.today_rounded),
@@ -87,14 +64,9 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
           ),
         ],
       ),
-      body: authBootstrap.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) =>
-            Center(child: Text('Authentication error: $error')),
-        data: (_) => IndexedStack(
-          index: _selectedTab,
-          children: const [_TrackTab(), _StatsTab()],
-        ),
+      body: IndexedStack(
+        index: _selectedTab,
+        children: const [_TrackTab(), _StatsTab()],
       ),
       floatingActionButton: _selectedTab == 0
           ? FloatingActionButton.extended(
@@ -142,11 +114,11 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
 
   String _authLabel(dynamic user) {
     if (user == null) {
-      return 'No user';
+      return 'Signed out';
     }
 
     if (user.isAnonymous == true) {
-      return 'Guest';
+      return 'Sign-in required';
     }
 
     final uid = user.uid as String?;
