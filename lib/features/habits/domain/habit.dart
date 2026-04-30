@@ -23,6 +23,7 @@ class Habit {
     required this.name,
     required this.frequency,
     required this.createdAt,
+    this.categoryId,
     this.intervalDays,
     this.anchor,
     this.archived = false,
@@ -32,6 +33,7 @@ class Habit {
   final String name;
   final HabitFrequency frequency;
   final DateTime createdAt;
+  final String? categoryId;
   final int? intervalDays;
   final int? anchor;
   final bool archived;
@@ -41,6 +43,7 @@ class Habit {
       'name': name,
       'frequency': frequency.name,
       'createdAt': createdAt.millisecondsSinceEpoch,
+      'categoryId': categoryId,
       'intervalDays': intervalDays,
       'anchor': anchor,
       'archived': archived,
@@ -52,6 +55,7 @@ class Habit {
     String? name,
     HabitFrequency? frequency,
     DateTime? createdAt,
+    String? categoryId,
     int? intervalDays,
     int? anchor,
     bool? archived,
@@ -61,6 +65,7 @@ class Habit {
       name: name ?? this.name,
       frequency: frequency ?? this.frequency,
       createdAt: createdAt ?? this.createdAt,
+      categoryId: categoryId ?? this.categoryId,
       intervalDays: intervalDays ?? this.intervalDays,
       anchor: anchor ?? this.anchor,
       archived: archived ?? this.archived,
@@ -104,6 +109,7 @@ class Habit {
         orElse: () => HabitFrequency.daily,
       ),
       createdAt: createdAt,
+      categoryId: map['categoryId'] as String?,
       intervalDays: map['intervalDays'] as int?,
       anchor: map['anchor'] as int?,
       archived: (map['archived'] as bool?) ?? false,

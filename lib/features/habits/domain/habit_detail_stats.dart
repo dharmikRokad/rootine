@@ -45,6 +45,7 @@ class HabitDetailStats {
     required this.streakHistory,
     required this.heatmap,
     required this.weeklyAdherence,
+    required this.recentNotes,
   });
 
   final Habit habit;
@@ -55,6 +56,7 @@ class HabitDetailStats {
   final List<HabitStreakPoint> streakHistory;
   final List<HabitHeatmapCell> heatmap;
   final List<HabitWeeklyAdherencePoint> weeklyAdherence;
+  final List<HabitCompletionNoteItem> recentNotes;
 
   double get last30Rate {
     if (last30Due == 0) {
@@ -62,4 +64,11 @@ class HabitDetailStats {
     }
     return last30Completed / last30Due;
   }
+}
+
+class HabitCompletionNoteItem {
+  const HabitCompletionNoteItem({required this.date, required this.note});
+
+  final DateTime date;
+  final String note;
 }

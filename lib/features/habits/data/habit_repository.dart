@@ -1,4 +1,5 @@
 import '../domain/habit.dart';
+import '../domain/habit_category.dart';
 import '../domain/habit_completion.dart';
 
 abstract class HabitRepository {
@@ -6,7 +7,11 @@ abstract class HabitRepository {
 
   Stream<List<Habit>> watchArchivedHabits();
 
+  Stream<List<HabitCategory>> watchCategories();
+
   Stream<List<HabitCompletion>> watchCompletions();
+
+  Stream<Map<String, bool>> watchAchievementCelebrationStatus();
 
   Future<void> addHabit(Habit habit);
 
@@ -18,9 +23,28 @@ abstract class HabitRepository {
 
   Future<void> deleteHabit(String habitId);
 
+  Future<void> addCategory(HabitCategory category);
+
+  Future<void> updateCategory(HabitCategory category);
+
+  Future<void> deleteCategory(String categoryId);
+
+  Future<void> ensureSystemCategories();
+
   Future<void> setHabitCompletion({
     required String habitId,
     required DateTime date,
     required bool isDone,
+    String? note,
   });
+
+  Future<void> setHabitCompletionNote({
+    required String habitId,
+    required DateTime date,
+    required String note,
+  });
+
+  Future<void> ensureAchievementUnlocked(String achievementKey);
+
+  Future<void> markAchievementsCelebrated(List<String> achievementKeys);
 }

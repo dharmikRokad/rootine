@@ -5,11 +5,13 @@ class HabitCompletion {
     required this.habitId,
     required this.date,
     required this.completedAt,
+    this.note,
   });
 
   final String habitId;
   final DateTime date;
   final DateTime completedAt;
+  final String? note;
 
   String get id => '${habitId}_${dateKey(date)}';
 
@@ -18,6 +20,7 @@ class HabitCompletion {
       'habitId': habitId,
       'date': dateKey(date),
       'completedAt': completedAt.millisecondsSinceEpoch,
+      'note': note,
     };
   }
 
@@ -43,6 +46,9 @@ class HabitCompletion {
       habitId: (map['habitId'] as String?) ?? '',
       date: normalizeDate(parsedDate),
       completedAt: completedAt,
+      note: (map['note'] as String?)?.trim().isEmpty == true
+          ? null
+          : map['note'] as String?,
     );
   }
 }
