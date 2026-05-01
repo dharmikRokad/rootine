@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/date_helpers.dart';
@@ -165,6 +166,20 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
 
     if (user.isAnonymous == true) {
       return 'Sign-in required';
+    }
+
+    final displayName = (user.displayName as String?)?.trim();
+    if (displayName != null && displayName.isNotEmpty) {
+      return displayName;
+    }
+
+    final email = (user.email as String?)?.trim();
+    if (email != null && email.isNotEmpty) {
+      final namePart = email.split('@').first.trim();
+      if (namePart.isNotEmpty) {
+        return namePart;
+      }
+      return email;
     }
 
     final uid = user.uid as String?;

@@ -5,10 +5,12 @@ class HabitDetailsPage extends ConsumerWidget {
     super.key,
     required this.habitId,
     required this.title,
+    this.focusDate,
   });
 
   final String habitId;
   final String title;
+  final DateTime? focusDate;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -16,104 +18,129 @@ class HabitDetailsPage extends ConsumerWidget {
     final achievementsValue = ref.watch(habitAchievementsProvider(habitId));
     ref.watch(syncHabitAchievementUnlocksProvider(habitId));
     final dateFormat = DateFormat('EEE, d MMM yyyy');
+    final selectedDate = normalizeDate(
+      focusDate ?? ref.watch(selectedDateProvider),
+    );
+    final today = normalizeDate(DateTime.now());
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: [
-          IconButton(
-            tooltip: 'Add completion note',
-            icon: const Icon(Icons.note_add_outlined),
-            onPressed: () => _openNoteEditor(context, ref),
-          ),
-        ],
+    return detailValue.when(
+      loading: () => Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: const Center(child: CircularProgressIndicator()),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: detailValue.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) =>
-              Center(child: Text('Could not load details: $error')),
-          data: (stats) => ListView(
-            children: [
-              _StatCard(
-                title: 'Current Streak',
-                value: '${stats.currentStreak} check-ins',
-              ),
-              const SizedBox(height: 10),
-              _StatCard(
-                title: 'Best Streak (30-day window)',
-                value: '${stats.bestStreak} check-ins',
-              ),
-              const SizedBox(height: 10),
-              _StatCard(
-                title: 'Last 30 Days Adherence',
-                value:
-                    '${stats.last30Completed}/${stats.last30Due} (${(stats.last30Rate * 100).toStringAsFixed(1)}%)',
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'Streak History (30 days)',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 10),
-              _HabitStreakChart(points: stats.streakHistory),
-              const SizedBox(height: 18),
-              Text(
-                'Missed-day Heatmap (12 weeks)',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 10),
-              _HabitHeatmap(cells: stats.heatmap),
-              const SizedBox(height: 18),
-              Text(
-                'Frequency Adherence (Weekly)',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 10),
-              _WeeklyAdherenceChart(points: stats.weeklyAdherence),
-              const SizedBox(height: 18),
-              _AchievementsSection(
-                scope: 'habit:$habitId',
-                title: 'Habit Achievements',
-                value: achievementsValue,
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'Completion Notes',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 10),
-              if (stats.recentNotes.isEmpty)
-                const Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(14),
-                    child: Text('No notes yet. Tap the note icon to add one.'),
-                  ),
-                )
-              else
-                ...stats.recentNotes.map(
-                  (item) => Card(
+      error: (error, _) => Scaffold(
+        appBar: AppBar(title: Text(title)),
+        body: Center(child: Text('Could not load details: $error')),
+      ),
+      data: (stats) {
+        HabitCompletionNoteItem? selectedDayNote;
+        for (final item in stats.recentNotes) {
+          if (normalizeDate(item.date) == selectedDate) {
+            selectedDayNote = item;
+            break;
+          }
+        }
+
+        final noteHeading = selectedDate == today
+            ? 'Today\'s Note'
+            : 'Note for ${dateFormat.format(selectedDate)}';
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(title),
+            actions: [
+              if (selectedDayNote == null)
+                IconButton(
+                  tooltip: 'Add completion note',
+                  icon: const Icon(Icons.note_add_outlined),
+                  onPressed: () =>
+                      _openNoteEditor(context, ref, initialDate: selectedDate),
+                ),
+            ],
+          ),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: ListView(
+              children: [
+                Text(
+                  noteHeading,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 10),
+                if (selectedDayNote == null)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Text(
+                        'No note for this day yet. Tap the note icon to add one.',
+                      ),
+                    ),
+                  )
+                else
+                  Card(
                     child: ListTile(
-                      title: Text(item.note),
-                      subtitle: Text(dateFormat.format(item.date)),
+                      title: Text(selectedDayNote.note),
+                      subtitle: Text(dateFormat.format(selectedDayNote.date)),
                       trailing: IconButton(
                         tooltip: 'Edit note',
                         icon: const Icon(Icons.edit_outlined),
                         onPressed: () => _openNoteEditor(
                           context,
                           ref,
-                          initialDate: item.date,
-                          initialNote: item.note,
+                          initialDate: selectedDayNote!.date,
+                          initialNote: selectedDayNote.note,
                         ),
                       ),
                     ),
                   ),
+                const SizedBox(height: 18),
+                _StatCard(
+                  title: 'Current Streak',
+                  value: '${stats.currentStreak} check-ins',
                 ),
-            ],
+                const SizedBox(height: 10),
+                _StatCard(
+                  title: 'Best Streak (30-day window)',
+                  value: '${stats.bestStreak} check-ins',
+                ),
+                const SizedBox(height: 10),
+                _StatCard(
+                  title: 'Last 30 Days Adherence',
+                  value:
+                      '${stats.last30Completed}/${stats.last30Due} (${(stats.last30Rate * 100).toStringAsFixed(1)}%)',
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Streak History (30 days)',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 10),
+                _HabitStreakChart(points: stats.streakHistory),
+                const SizedBox(height: 18),
+                Text(
+                  'Missed-day Heatmap (12 weeks)',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 10),
+                _HabitHeatmap(cells: stats.heatmap),
+                const SizedBox(height: 18),
+                Text(
+                  'Frequency Adherence (Weekly)',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 10),
+                _WeeklyAdherenceChart(points: stats.weeklyAdherence),
+                const SizedBox(height: 18),
+                _AchievementsSection(
+                  scope: 'habit:$habitId',
+                  title: 'Habit Achievements',
+                  value: achievementsValue,
+                ),
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -206,7 +233,9 @@ class HabitDetailsPage extends ConsumerWidget {
       return;
     }
 
-    await ref.read(habitActionsProvider).setCompletionNote(
+    await ref
+        .read(habitActionsProvider)
+        .setCompletionNote(
           habitId: habitId,
           date: result.date,
           note: result.note,

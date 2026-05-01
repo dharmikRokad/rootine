@@ -54,7 +54,7 @@ class _TrackTab extends ConsumerWidget {
                                 isDone: value,
                               );
                         },
-                        onDetails: () => _openDetails(context, habit),
+                        onDetails: () => _openDetails(context, habit, date),
                         onEdit: () => _openEditHabitSheet(context, habit),
                         onArchive: () async {
                           await ref
@@ -92,10 +92,18 @@ class _TrackTab extends ConsumerWidget {
     );
   }
 
-  Future<void> _openDetails(BuildContext context, Habit habit) async {
+  Future<void> _openDetails(
+    BuildContext context,
+    Habit habit,
+    DateTime selectedDate,
+  ) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => HabitDetailsPage(habitId: habit.id, title: habit.name),
+        builder: (_) => HabitDetailsPage(
+          habitId: habit.id,
+          title: habit.name,
+          focusDate: selectedDate,
+        ),
       ),
     );
   }
@@ -142,6 +150,7 @@ class _CategoryFilterBar extends ConsumerWidget {
               child: ChoiceChip(
                 label: const Text('All'),
                 selected: selectedCategoryId == null,
+                showCheckmark: false,
                 onSelected: (_) {
                   ref.read(selectedCategoryFilterProvider.notifier).state =
                       null;
@@ -154,6 +163,7 @@ class _CategoryFilterBar extends ConsumerWidget {
                 child: ChoiceChip(
                   label: Text(category.name),
                   selected: selectedCategoryId == category.id,
+                  showCheckmark: false,
                   onSelected: (_) {
                     ref.read(selectedCategoryFilterProvider.notifier).state =
                         category.id;
@@ -191,36 +201,91 @@ class _HabitTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: CheckboxListTile(
-        value: isDone,
-        onChanged: (value) => onChanged(value ?? false),
-        title: Text(habit.name),
-        subtitle: Text(_subtitle(habit)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        secondary: PopupMenuButton<String>(
-          onSelected: (value) {
-            switch (value) {
-              case 'details':
-                onDetails();
-                break;
-              case 'edit':
-                onEdit();
-                break;
-              case 'archive':
-                onArchive();
-                break;
-              case 'delete':
-                onDelete();
-                break;
-            }
-          },
-          itemBuilder: (context) => const [
-            PopupMenuItem(value: 'details', child: Text('Details')),
-            PopupMenuItem(value: 'edit', child: Text('Edit')),
-            PopupMenuItem(value: 'archive', child: Text('Archive')),
-            PopupMenuItem(value: 'delete', child: Text('Delete')),
-          ],
+    final theme = Theme.of(context);
+
+    return Slidable(
+      key: ValueKey(habit.id),
+      endActionPane: ActionPane(
+        motion: const DrawerMotion(),
+        extentRatio: 0.78,
+        children: [
+          SlidableAction(
+            onPressed: (_) => onEdit(),
+            icon: Icons.edit_outlined,
+            label: 'Edit',
+            backgroundColor: theme.colorScheme.tertiaryContainer,
+            foregroundColor: theme.colorScheme.onTertiaryContainer,
+            borderRadius: const BorderRadius.horizontal(
+              left: Radius.circular(16),
+            ),
+          ),
+          SlidableAction(
+            onPressed: (_) => onArchive(),
+            icon: Icons.archive_outlined,
+            label: 'Archive',
+            backgroundColor: theme.colorScheme.secondaryContainer,
+            foregroundColor: theme.colorScheme.onSecondaryContainer,
+          ),
+          SlidableAction(
+            onPressed: (_) => onDelete(),
+            icon: Icons.delete_outline,
+            label: 'Delete',
+            backgroundColor: theme.colorScheme.errorContainer,
+            foregroundColor: theme.colorScheme.onErrorContainer,
+            borderRadius: const BorderRadius.horizontal(
+              right: Radius.circular(16),
+            ),
+          ),
+        ],
+      ),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onDetails,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: Row(
+              children: [
+                Checkbox(
+                  value: isDone,
+                  onChanged: (value) => onChanged(value ?? false),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        habit.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          decoration: isDone
+                              ? TextDecoration.lineThrough
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _subtitle(habit),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
