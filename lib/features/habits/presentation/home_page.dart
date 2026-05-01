@@ -33,6 +33,7 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).valueOrNull;
+    final selectedDate = ref.watch(selectedDateProvider);
     final categoriesBootstrap = ref.watch(categoriesBootstrapProvider);
 
     return Scaffold(
@@ -84,10 +85,19 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
       appBar: AppBar(
         title: const Text('Habitz'),
         actions: [
-          IconButton(
-            tooltip: 'Today',
-            icon: const Icon(Icons.today_rounded),
-            onPressed: () {
+          _DaySwitcher(
+            date: selectedDate,
+            onPrevious: () {
+              ref.read(selectedDateProvider.notifier).state = normalizeDate(
+                selectedDate.subtract(const Duration(days: 1)),
+              );
+            },
+            onNext: () {
+              ref.read(selectedDateProvider.notifier).state = normalizeDate(
+                selectedDate.add(const Duration(days: 1)),
+              );
+            },
+            onToday: () {
               ref.read(selectedDateProvider.notifier).state = normalizeDate(
                 DateTime.now(),
               );
@@ -164,5 +174,61 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
 
     final short = min(6, uid.length);
     return 'User ${uid.substring(0, short)}';
+  }
+}
+
+class _DaySwitcher extends StatelessWidget {
+  const _DaySwitcher({
+    required this.date,
+    required this.onPrevious,
+    required this.onNext,
+    required this.onToday,
+  });
+
+  final DateTime date;
+  final VoidCallback onPrevious;
+  final VoidCallback onNext;
+  final VoidCallback onToday;
+
+  @override
+  Widget build(BuildContext context) {
+    final format = DateFormat('EEE, d MMM');
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Material(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(999),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              tooltip: 'Previous day',
+              icon: const Icon(Icons.chevron_left),
+              onPressed: onPrevious,
+            ),
+            InkWell(
+              borderRadius: BorderRadius.circular(999),
+              onTap: onToday,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                child: Text(
+                  format.format(date),
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: 'Next day',
+              icon: const Icon(Icons.chevron_right),
+              onPressed: onNext,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

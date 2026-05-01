@@ -14,8 +14,6 @@ class _TrackTab extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: Column(
         children: [
-          _DateHeader(date: date),
-          const SizedBox(height: 12),
           const _CategoryFilterBar(),
           const SizedBox(height: 12),
           Expanded(
@@ -48,7 +46,9 @@ class _TrackTab extends ConsumerWidget {
                         isDone: isDone,
                         categoryName: categoryById[habit.categoryId]?.name,
                         onChanged: (value) {
-                          ref.read(habitActionsProvider).setCompleted(
+                          ref
+                              .read(habitActionsProvider)
+                              .setCompleted(
                                 habitId: habit.id,
                                 date: date,
                                 isDone: value,
@@ -64,7 +64,7 @@ class _TrackTab extends ConsumerWidget {
                         onDelete: () async {
                           final shouldDelete =
                               await _confirmDeleteHabit(context, habit.name) ??
-                                  false;
+                              false;
                           if (!shouldDelete) {
                             return;
                           }
@@ -160,51 +160,6 @@ class _CategoryFilterBar extends ConsumerWidget {
                   },
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DateHeader extends ConsumerWidget {
-  const _DateHeader({required this.date});
-
-  final DateTime date;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final format = DateFormat('EEE, d MMM yyyy');
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        child: Row(
-          children: [
-            IconButton(
-              onPressed: () {
-                ref.read(selectedDateProvider.notifier).state = normalizeDate(
-                  date.subtract(const Duration(days: 1)),
-                );
-              },
-              icon: const Icon(Icons.chevron_left),
-            ),
-            Expanded(
-              child: Center(
-                child: Text(
-                  format.format(date),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                ref.read(selectedDateProvider.notifier).state = normalizeDate(
-                  date.add(const Duration(days: 1)),
-                );
-              },
-              icon: const Icon(Icons.chevron_right),
             ),
           ],
         ),
