@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBER9aSyiOQX5jyIqhnxDPjwu7V-2Z1kHI',
-    appId: '1:373360261694:android:13ffb287bdaae6a6d1af6f',
+    appId: '1:373360261694:android:7fac542c0a12b3f1d1af6f',
     messagingSenderId: '373360261694',
     projectId: 'habitz-4571a',
     storageBucket: 'habitz-4571a.firebasestorage.app',
@@ -59,12 +59,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyC4rAAxDusfox1IiPGaXL-nsMzhhcu3q0Y',
-    appId: '1:373360261694:ios:a8e7227ce463ab18d1af6f',
+    appId: '1:373360261694:ios:14a7dd69e7dca87ad1af6f',
     messagingSenderId: '373360261694',
     projectId: 'habitz-4571a',
     storageBucket: 'habitz-4571a.firebasestorage.app',
-    iosClientId:
-        '373360261694-9osjo38csc2pm1bcqnm2644h55d1q5j3.apps.googleusercontent.com',
+    androidClientId: '373360261694-u7nvr2q0ut618ufp235vpjiajbq4vd6o.apps.googleusercontent.com',
+    iosClientId: '373360261694-plqif4c40fm0r0juiut1ta9sqetfukam.apps.googleusercontent.com',
     iosBundleId: 'com.rootine.app',
   );
+
 }

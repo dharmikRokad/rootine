@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:373360261694:android:13ffb287bdaae6a6d1af6f",
+        "mobilesdk_app_id": "1:373360261694:android:7fac542c0a12b3f1d1af6f",
         "android_client_info": {
           "package_name": "com.rootine.app"
         }
@@ -29,6 +29,13 @@
             {
               "client_id": "373360261694-lp4r5fdg5nk51vdgtj70n7p3t43g7ijc.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "373360261694-9osjo38csc2pm1bcqnm2644h55d1q5j3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.habitz"
+              }
             }
           ]
         }
