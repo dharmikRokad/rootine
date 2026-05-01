@@ -63,7 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '373360261694',
     projectId: 'habitz-4571a',
     storageBucket: 'habitz-4571a.firebasestorage.app',
-    iosClientId: '373360261694-9osjo38csc2pm1bcqnm2644h55d1q5j3.apps.googleusercontent.com',
-    iosBundleId: 'com.example.habitz',
+    iosClientId:
+        '373360261694-9osjo38csc2pm1bcqnm2644h55d1q5j3.apps.googleusercontent.com',
+    iosBundleId: 'com.rootine.app',
   );
 }
