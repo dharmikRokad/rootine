@@ -18,6 +18,7 @@ import '../domain/habit_stats.dart';
 part 'home/archived_habits_page.dart';
 part 'home/create_habit_sheet.dart';
 part 'home/habit_details_page.dart';
+part 'home/manage_categories_page.dart';
 part 'home/stats_tab.dart';
 part 'home/track_tab.dart';
 
@@ -62,6 +63,14 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
                     ),
                   ],
                 ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.category_outlined),
+                title: const Text('Manage categories'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _openManageCategories(context);
+                },
               ),
               ListTile(
                 leading: const Icon(Icons.archive_outlined),
@@ -157,6 +166,12 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
     await Navigator.of(
       context,
     ).push(MaterialPageRoute<void>(builder: (_) => const ArchivedHabitsPage()));
+  }
+
+  Future<void> _openManageCategories(BuildContext context) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => const ManageCategoriesPage()),
+    );
   }
 
   String _authLabel(dynamic user) {

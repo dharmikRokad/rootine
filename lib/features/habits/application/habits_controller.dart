@@ -179,7 +179,11 @@ final overallAchievementsProvider =
         return const AsyncValue.data(<HabitAchievement>[]);
       }
 
-      final achievements = _buildOverallAchievements(habits, completions, stats);
+      final achievements = _buildOverallAchievements(
+        habits,
+        completions,
+        stats,
+      );
       final celebrationStatus =
           celebrationStatusValue.value ?? const <String, bool>{};
 
@@ -285,29 +289,30 @@ final habitAchievementsProvider =
       );
     });
 
-final syncHabitAchievementUnlocksProvider =
-    FutureProvider.family<void, String>((ref, habitId) async {
-      final achievements = ref.watch(habitAchievementsProvider(habitId)).value;
-      final celebrationStatus =
-          ref.watch(achievementCelebrationStatusProvider).value ??
-          const <String, bool>{};
+final syncHabitAchievementUnlocksProvider = FutureProvider.family<void, String>(
+  (ref, habitId) async {
+    final achievements = ref.watch(habitAchievementsProvider(habitId)).value;
+    final celebrationStatus =
+        ref.watch(achievementCelebrationStatusProvider).value ??
+        const <String, bool>{};
 
-      if (achievements == null) {
-        return;
-      }
+    if (achievements == null) {
+      return;
+    }
 
-      final repository = ref.watch(habitRepositoryProvider);
-      for (final achievement in achievements) {
-        if (!achievement.unlocked) {
-          continue;
-        }
-        final key = _scopedAchievementKey('habit:$habitId', achievement.id);
-        if (celebrationStatus.containsKey(key)) {
-          continue;
-        }
-        await repository.ensureAchievementUnlocked(key);
+    final repository = ref.watch(habitRepositoryProvider);
+    for (final achievement in achievements) {
+      if (!achievement.unlocked) {
+        continue;
       }
-    });
+      final key = _scopedAchievementKey('habit:$habitId', achievement.id);
+      if (celebrationStatus.containsKey(key)) {
+        continue;
+      }
+      await repository.ensureAchievementUnlocked(key);
+    }
+  },
+);
 
 HabitDetailStats _buildHabitDetailStats(
   Habit habit,
@@ -706,14 +711,12 @@ List<HabitAchievement> _withCelebrationState(
   required String scope,
   required Map<String, bool> celebrationStatus,
 }) {
-  return achievements
-      .map((achievement) {
-        final key = _scopedAchievementKey(scope, achievement.id);
-        final celebrated = celebrationStatus[key];
-        final isNewlyUnlocked = achievement.unlocked && celebrated == false;
-        return achievement.copyWith(isNewlyUnlocked: isNewlyUnlocked);
-      })
-      .toList();
+  return achievements.map((achievement) {
+    final key = _scopedAchievementKey(scope, achievement.id);
+    final celebrated = celebrationStatus[key];
+    final isNewlyUnlocked = achievement.unlocked && celebrated == false;
+    return achievement.copyWith(isNewlyUnlocked: isNewlyUnlocked);
+  }).toList();
 }
 
 final habitActionsProvider = Provider<HabitActions>((ref) {
@@ -820,6 +823,23 @@ class HabitActions {
     );
     await _repository.addCategory(category);
     return category;
+  }
+
+  Future<void> updateCategory({
+    required HabitCategory category,
+    required String name,
+    int? colorValue,
+  }) {
+    return _repository.updateCategory(
+      category.copyWith(
+        name: name,
+        colorValue: colorValue ?? category.colorValue,
+      ),
+    );
+  }
+
+  Future<void> deleteCategory(String categoryId) {
+    return _repository.deleteCategory(categoryId);
   }
 
   Future<void> markAchievementsCelebrated(
