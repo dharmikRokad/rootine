@@ -1,3 +1,6 @@
+import '../../../../core/app_colors.dart';
+import '../../../../core/app_strings.dart';
+
 class HabitCategory {
   const HabitCategory({
     required this.id,
@@ -51,8 +54,8 @@ class HabitCategory {
 
     return HabitCategory(
       id: id,
-      name: (map['name'] as String?) ?? 'Category',
-      colorValue: (map['colorValue'] as int?) ?? 0xFF0A7E8C,
+      name: (map['name'] as String?) ?? AppStrings.defaultCategory,
+      colorValue: (map['colorValue'] as int?) ?? AppColors.seedInt,
       iconCodePoint: map['iconCodePoint'] as int?,
       isSystem: (map['isSystem'] as bool?) ?? false,
       createdAt: createdAt,
@@ -61,11 +64,11 @@ class HabitCategory {
 }
 
 const defaultHabitCategories = <({String id, String name, int colorValue})>[
-  (id: 'health', name: 'Health', colorValue: 0xFF2D9CDB),
-  (id: 'fitness', name: 'Fitness', colorValue: 0xFF27AE60),
-  (id: 'learning', name: 'Learning', colorValue: 0xFFF2994A),
-  (id: 'work', name: 'Work', colorValue: 0xFF6C5CE7),
-  (id: 'mindfulness', name: 'Mindfulness', colorValue: 0xFF00B894),
-  (id: 'personal', name: 'Personal', colorValue: 0xFFE17055),
-  (id: 'finance', name: 'Finance', colorValue: 0xFF0984E3),
+  (id: 'health',      name: AppStrings.categoryHealth,      colorValue: AppColors.categoryColorHealthInt),
+  (id: 'fitness',     name: AppStrings.categoryFitness,     colorValue: AppColors.categoryColorFitnessInt),
+  (id: 'learning',    name: AppStrings.categoryLearning,    colorValue: AppColors.categoryColorLearningInt),
+  (id: 'work',        name: AppStrings.categoryWork,        colorValue: AppColors.categoryColorWorkInt),
+  (id: 'mindfulness', name: AppStrings.categoryMindfulness, colorValue: AppColors.categoryColorMindfulnessInt),
+  (id: 'personal',    name: AppStrings.categoryPersonal,    colorValue: AppColors.categoryColorPersonalInt),
+  (id: 'finance',     name: AppStrings.categoryFinance,     colorValue: AppColors.categoryColorFinanceInt),
 ];

@@ -67,19 +67,19 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isEditing ? 'Edit Habit' : 'Create Habit',
+                isEditing ? AppStrings.editHabit : AppStrings.createHabit,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
-                  labelText: 'Habit name',
+                  labelText: AppStrings.habitName,
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a habit name';
+                    return AppStrings.pleaseEnterHabitName;
                   }
                   return null;
                 },
@@ -91,13 +91,13 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
                     child: DropdownButtonFormField<String?>(
                       initialValue: _categoryId,
                       decoration: const InputDecoration(
-                        labelText: 'Category',
+                        labelText: AppStrings.category,
                         border: OutlineInputBorder(),
                       ),
                       items: [
                         const DropdownMenuItem<String?>(
                           value: null,
-                          child: Text('No category'),
+                          child: Text(AppStrings.noCategory),
                         ),
                         ...categories.map(
                           (category) => DropdownMenuItem<String?>(
@@ -115,7 +115,7 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    tooltip: 'Add category',
+                    tooltip: AppStrings.addCategory,
                     onPressed: () => _createCategory(context),
                     icon: const Icon(Icons.add_circle_outline),
                   ),
@@ -125,7 +125,7 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
               DropdownButtonFormField<HabitFrequency>(
                 initialValue: _frequency,
                 decoration: const InputDecoration(
-                  labelText: 'Frequency',
+                  labelText: AppStrings.frequency,
                   border: OutlineInputBorder(),
                 ),
                 items: HabitFrequency.values
@@ -150,7 +150,7 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
                   initialValue: '$_intervalDays',
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    labelText: 'Every n days',
+                    labelText: AppStrings.everyNDays,
                     border: OutlineInputBorder(),
                   ),
                   onChanged: (value) {
@@ -166,14 +166,14 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
                 DropdownButtonFormField<int>(
                   initialValue: _weekday,
                   decoration: const InputDecoration(
-                    labelText: 'Weekday',
+                    labelText: AppStrings.weekday,
                     border: OutlineInputBorder(),
                   ),
                   items: List.generate(
                     7,
                     (index) => DropdownMenuItem(
                       value: index + 1,
-                      child: Text(_weekdayLong(index + 1)),
+                      child: Text(AppStrings.weekdayNames[index]),
                     ),
                   ),
                   onChanged: (value) {
@@ -187,7 +187,7 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
               ],
               if (_frequency == HabitFrequency.monthly) ...[
                 const SizedBox(height: 12),
-                Text('Day of month: $_monthDay'),
+                Text('${AppStrings.dayOfMonth} $_monthDay'),
                 Slider(
                   min: 1,
                   max: 31,
@@ -206,7 +206,9 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
                 width: double.infinity,
                 child: FilledButton(
                   onPressed: _submit,
-                  child: Text(isEditing ? 'Save Changes' : 'Save Habit'),
+                  child: Text(
+                    isEditing ? AppStrings.saveChanges : AppStrings.saveHabit,
+                  ),
                 ),
               ),
             ],
@@ -240,7 +242,9 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
 
     final initial = widget.initialHabit;
     if (initial == null) {
-      await ref.read(habitActionsProvider).createHabit(
+      await ref
+          .read(habitActionsProvider)
+          .createHabit(
             name: _nameController.text.trim(),
             frequency: _frequency,
             categoryId: _categoryId,
@@ -248,7 +252,9 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
             anchor: anchor,
           );
     } else {
-      await ref.read(habitActionsProvider).editHabit(
+      await ref
+          .read(habitActionsProvider)
+          .editHabit(
             habit: initial,
             name: _nameController.text.trim(),
             frequency: _frequency,
@@ -263,21 +269,6 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
     }
   }
 
-  String _weekdayLong(int weekday) {
-    const labels = [
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday',
-    ];
-
-    final index = (weekday - 1).clamp(0, 6);
-    return labels[index];
-  }
-
   Future<void> _createCategory(BuildContext context) async {
     final result = await showDialog<_CategoryInput>(
       context: context,
@@ -288,7 +279,9 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
       return;
     }
 
-    final category = await ref.read(habitActionsProvider).createCategory(
+    final category = await ref
+        .read(habitActionsProvider)
+        .createCategory(
           name: result.name.trim(),
           colorValue: result.colorValue,
         );
@@ -301,105 +294,4 @@ class _CreateHabitSheetState extends ConsumerState<_CreateHabitSheet> {
       _categoryId = category.id;
     });
   }
-}
-
-class _CreateCategoryDialog extends StatefulWidget {
-  const _CreateCategoryDialog();
-
-  @override
-  State<_CreateCategoryDialog> createState() => _CreateCategoryDialogState();
-}
-
-class _CreateCategoryDialogState extends State<_CreateCategoryDialog> {
-  final _nameController = TextEditingController();
-  int _selectedColor = 0xFF0A7E8C;
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    const colors = <int>[
-      0xFF0A7E8C,
-      0xFF27AE60,
-      0xFF2D9CDB,
-      0xFFF2994A,
-      0xFFE17055,
-      0xFF6C5CE7,
-    ];
-
-    return AlertDialog(
-      title: const Text('Create category'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: 'Category name',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: colors
-                .map(
-                  (colorValue) => GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedColor = colorValue;
-                      });
-                    },
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: Color(colorValue),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: _selectedColor == colorValue
-                              ? Colors.black
-                              : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-                )
-                .toList(),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () {
-            Navigator.of(context).pop(
-              _CategoryInput(
-                name: _nameController.text,
-                colorValue: _selectedColor,
-              ),
-            );
-          },
-          child: const Text('Create'),
-        ),
-      ],
-    );
-  }
-}
-
-class _CategoryInput {
-  const _CategoryInput({required this.name, required this.colorValue});
-
-  final String name;
-  final int colorValue;
 }

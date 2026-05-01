@@ -6,21 +6,43 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/app_colors.dart';
+import '../../../core/app_strings.dart';
 import '../../../core/date_helpers.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/habits_controller.dart';
-import '../domain/habit.dart';
-import '../domain/habit_achievement.dart';
-import '../domain/habit_category.dart';
-import '../domain/habit_detail_stats.dart';
-import '../domain/habit_stats.dart';
+import '../domain/entity/habit.dart';
+import '../domain/entity/habit_achievement.dart';
+import '../domain/entity/habit_category.dart';
+import '../domain/entity/habit_detail_stats.dart';
+import '../domain/habit_extensions.dart';
+import '../domain/entity/habit_stats.dart';
+import '../domain/stats_extensions.dart';
 
 part 'home/archived_habits_page.dart';
 part 'home/create_habit_sheet.dart';
+part 'home/sheet/create_category_dialog.dart';
+part 'home/sheet/category_input.dart';
+part 'home/day_switcher.dart';
 part 'home/habit_details_page.dart';
+part 'home/details/habit_streak_chart.dart';
+part 'home/details/habit_heatmap.dart';
+part 'home/details/legend_dot.dart';
+part 'home/details/weekly_adherence_chart.dart';
+part 'home/details/note_edit_result.dart';
 part 'home/manage_categories_page.dart';
+part 'home/categories/category_name_dialog.dart';
 part 'home/stats_tab.dart';
+part 'home/stats/stat_card.dart';
+part 'home/stats/achievements_section.dart';
+part 'home/stats/celebration_banner.dart';
+part 'home/stats/completion_line_chart.dart';
+part 'home/stats/completion_bar_chart.dart';
+part 'home/stats/rolling_rate_chart.dart';
+part 'home/stats/weekday_performance_chart.dart';
 part 'home/track_tab.dart';
+part 'home/track/category_filter_bar.dart';
+part 'home/track/habit_tile.dart';
 
 class HabitsHomePage extends ConsumerStatefulWidget {
   const HabitsHomePage({super.key});
@@ -53,7 +75,7 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'Habitz',
+                      AppStrings.appTitle,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
@@ -66,7 +88,7 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
               ),
               ListTile(
                 leading: const Icon(Icons.category_outlined),
-                title: const Text('Manage categories'),
+                title: const Text(AppStrings.manageCategories),
                 onTap: () {
                   Navigator.of(context).pop();
                   _openManageCategories(context);
@@ -74,7 +96,7 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
               ),
               ListTile(
                 leading: const Icon(Icons.archive_outlined),
-                title: const Text('Archived habits'),
+                title: const Text(AppStrings.archivedHabits),
                 onTap: () {
                   Navigator.of(context).pop();
                   _openArchivedHabits(context);
@@ -82,7 +104,7 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
               ),
               ListTile(
                 leading: const Icon(Icons.logout),
-                title: const Text('Sign out'),
+                title: const Text(AppStrings.signOut),
                 onTap: () async {
                   Navigator.of(context).pop();
                   await ref.read(authActionsProvider).signOut();
@@ -93,7 +115,7 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
         ),
       ),
       appBar: AppBar(
-        title: const Text('Habitz'),
+        title: const Text(AppStrings.appTitle),
         actions: [
           _DaySwitcher(
             date: selectedDate,
@@ -117,8 +139,11 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
       ),
       body: categoriesBootstrap.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) =>
-            Center(child: Text('Could not load categories: $error')),
+        error: (error, _) => Center(
+          child: Text(
+            AppStrings.couldNotLoadMessage(AppStrings.categories, error),
+          ),
+        ),
         data: (_) => IndexedStack(
           index: _selectedTab,
           children: const [_TrackTab(), _StatsTab()],
@@ -128,7 +153,7 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
           ? FloatingActionButton.extended(
               onPressed: () => _openCreateHabitSheet(context),
               icon: const Icon(Icons.add),
-              label: const Text('New Habit'),
+              label: const Text(AppStrings.newHabit),
             )
           : null,
       bottomNavigationBar: NavigationBar(
@@ -142,12 +167,12 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
           NavigationDestination(
             icon: Icon(Icons.check_circle_outline),
             selectedIcon: Icon(Icons.check_circle),
-            label: 'Track',
+            label: AppStrings.track,
           ),
           NavigationDestination(
             icon: Icon(Icons.analytics_outlined),
             selectedIcon: Icon(Icons.analytics),
-            label: 'Stats',
+            label: AppStrings.stats,
           ),
         ],
       ),
@@ -176,11 +201,11 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
 
   String _authLabel(dynamic user) {
     if (user == null) {
-      return 'Signed out';
+      return AppStrings.signedOut;
     }
 
     if (user.isAnonymous == true) {
-      return 'Sign-in required';
+      return AppStrings.signInRequired;
     }
 
     final displayName = (user.displayName as String?)?.trim();
@@ -199,66 +224,10 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
 
     final uid = user.uid as String?;
     if (uid == null || uid.isEmpty) {
-      return 'Signed in';
+      return AppStrings.signedIn;
     }
 
     final short = min(6, uid.length);
-    return 'User ${uid.substring(0, short)}';
-  }
-}
-
-class _DaySwitcher extends StatelessWidget {
-  const _DaySwitcher({
-    required this.date,
-    required this.onPrevious,
-    required this.onNext,
-    required this.onToday,
-  });
-
-  final DateTime date;
-  final VoidCallback onPrevious;
-  final VoidCallback onNext;
-  final VoidCallback onToday;
-
-  @override
-  Widget build(BuildContext context) {
-    final format = DateFormat('EEE, d MMM');
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: Material(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(999),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              tooltip: 'Previous day',
-              icon: const Icon(Icons.chevron_left),
-              onPressed: onPrevious,
-            ),
-            InkWell(
-              borderRadius: BorderRadius.circular(999),
-              onTap: onToday,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                child: Text(
-                  format.format(date),
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ),
-            ),
-            IconButton(
-              tooltip: 'Next day',
-              icon: const Icon(Icons.chevron_right),
-              onPressed: onNext,
-            ),
-          ],
-        ),
-      ),
-    );
+    return '${AppStrings.userPrefix}${uid.substring(0, short)}';
   }
 }

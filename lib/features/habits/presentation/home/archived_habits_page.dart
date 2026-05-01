@@ -8,14 +8,17 @@ class ArchivedHabitsPage extends ConsumerWidget {
     final archivedValue = ref.watch(archivedHabitsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Archived Habits')),
+      appBar: AppBar(title: const Text(AppStrings.archivedHabitsTitle)),
       body: archivedValue.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) =>
-            Center(child: Text('Could not load archived: $error')),
+        error: (error, _) => Center(
+            child: Text(
+              AppStrings.couldNotLoadMessage(AppStrings.archived, error),
+            ),
+          ),
         data: (habits) {
           if (habits.isEmpty) {
-            return const Center(child: Text('No archived habits yet.'));
+            return const Center(child: Text(AppStrings.noArchivedHabitsYet));
           }
 
           return ListView.separated(
@@ -24,38 +27,62 @@ class ArchivedHabitsPage extends ConsumerWidget {
             separatorBuilder: (_, _) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
               final habit = habits[index];
-              return Card(
-                child: ListTile(
-                  title: Text(habit.name),
-                  subtitle: Text(_frequencySubtitle(habit)),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => HabitDetailsPage(
-                          habitId: habit.id,
-                          title: habit.name,
-                        ),
+              final theme = Theme.of(context);
+
+              return Slidable(
+                key: ValueKey(habit.id),
+                endActionPane: ActionPane(
+                  motion: const DrawerMotion(),
+                  extentRatio: 0.52,
+                  children: [
+                    SlidableAction(
+                      onPressed: (_) =>
+                          ref.read(habitActionsProvider).unarchiveHabit(habit.id),
+                      icon: Icons.unarchive_outlined,
+                      label: AppStrings.restore,
+                      backgroundColor: theme.colorScheme.secondaryContainer,
+                      foregroundColor: theme.colorScheme.onSecondaryContainer,
+                      borderRadius: const BorderRadius.horizontal(
+                        left: Radius.circular(16),
                       ),
-                    );
-                  },
-                  trailing: PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'restore') {
-                        ref.read(habitActionsProvider).unarchiveHabit(habit.id);
-                      }
-                      if (value == 'delete') {
+                    ),
+                    SlidableAction(
+                      onPressed: (_) {
                         _confirmDeleteHabit(context, habit.name).then((result) {
-                          if (result != true) {
-                            return;
+                          if (result == true) {
+                            ref.read(habitActionsProvider).deleteHabit(habit.id);
                           }
-                          ref.read(habitActionsProvider).deleteHabit(habit.id);
                         });
-                      }
+                      },
+                      icon: Icons.delete_outline,
+                      label: AppStrings.delete,
+                      backgroundColor: theme.colorScheme.errorContainer,
+                      foregroundColor: theme.colorScheme.onErrorContainer,
+                      borderRadius: const BorderRadius.horizontal(
+                        right: Radius.circular(16),
+                      ),
+                    ),
+                  ],
+                ),
+                child: Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: ListTile(
+                    title: Text(habit.name),
+                    subtitle: Text(habit.archivedSubtitle),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => HabitDetailsPage(
+                            habitId: habit.id,
+                            title: habit.name,
+                          ),
+                        ),
+                      );
                     },
-                    itemBuilder: (context) => const [
-                      PopupMenuItem(value: 'restore', child: Text('Restore')),
-                      PopupMenuItem(value: 'delete', child: Text('Delete')),
-                    ],
+                    trailing: Icon(
+                      Icons.swipe_left_outlined,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               );
@@ -66,33 +93,20 @@ class ArchivedHabitsPage extends ConsumerWidget {
     );
   }
 
-  String _frequencySubtitle(Habit habit) {
-    switch (habit.frequency) {
-      case HabitFrequency.daily:
-        return 'Daily';
-      case HabitFrequency.weekly:
-        return 'Weekly';
-      case HabitFrequency.monthly:
-        return 'Monthly';
-      case HabitFrequency.interval:
-        return 'Every ${habit.intervalDays ?? 1} days';
-    }
-  }
-
   Future<bool?> _confirmDeleteHabit(BuildContext context, String name) {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete habit?'),
-        content: Text('Delete "$name" permanently?'),
+        title: const Text(AppStrings.deleteHabitTitle),
+        content: Text(AppStrings.deleteHabitPermanentlyMessage(name)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: const Text(AppStrings.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
+            child: const Text(AppStrings.delete),
           ),
         ],
       ),

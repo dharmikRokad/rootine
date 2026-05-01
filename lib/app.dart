@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'core/app_colors.dart';
+import 'core/app_strings.dart';
 import 'features/auth/presentation/auth_gate_page.dart';
 
 class HabitzApp extends StatelessWidget {
@@ -8,17 +10,17 @@ class HabitzApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF0A7E8C),
+      seedColor: AppColors.seed,
       brightness: Brightness.light,
     );
 
     return MaterialApp(
-      title: 'Habitz',
+      title: AppStrings.appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: colorScheme,
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF4FBFB),
+        scaffoldBackgroundColor: AppColors.scaffoldBackground,
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -29,7 +31,7 @@ class HabitzApp extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          color: Colors.white,
+          color: AppColors.surface,
         ),
       ),
       home: const AuthGatePage(),

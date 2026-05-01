@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_colors.dart';
+import '../../../core/app_strings.dart';
 import '../../habits/presentation/home_page.dart';
 import '../application/auth_controller.dart';
 
@@ -14,8 +16,9 @@ class AuthGatePage extends ConsumerWidget {
     return authState.when(
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (error, _) =>
-          Scaffold(body: Center(child: Text('Authentication error: $error'))),
+      error: (error, _) => Scaffold(
+        body: Center(child: Text(AppStrings.authenticationErrorMessage(error))),
+      ),
       data: (user) {
         if (user != null && !user.isAnonymous) {
           return const HabitsHomePage();
@@ -42,7 +45,11 @@ class _SignInPage extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFFE8F6F8), Color(0xFFF4FBFB), Color(0xFFD7EEF1)],
+            colors: [
+              AppColors.authGradientStart,
+              AppColors.authGradientMid,
+              AppColors.authGradientEnd,
+            ],
           ),
         ),
         child: SafeArea(
@@ -55,20 +62,20 @@ class _SignInPage extends StatelessWidget {
                   const Icon(Icons.track_changes_rounded, size: 72),
                   const SizedBox(height: 12),
                   Text(
-                    'Welcome to Habitz',
+                    AppStrings.welcomeToHabitz,
                     style: Theme.of(context).textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Build streaks, track consistency, and sync your progress securely with Firebase.',
+                    AppStrings.welcomeSubtitle,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
                   FilledButton.icon(
                     onPressed: onSignIn,
                     icon: const Icon(Icons.login),
-                    label: const Text('Sign in with Google'),
+                    label: const Text(AppStrings.signInWithGoogle),
                   ),
                 ],
               ),

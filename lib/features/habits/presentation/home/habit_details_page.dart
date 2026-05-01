@@ -30,7 +30,7 @@ class HabitDetailsPage extends ConsumerWidget {
       ),
       error: (error, _) => Scaffold(
         appBar: AppBar(title: Text(title)),
-        body: Center(child: Text('Could not load details: $error')),
+        body: Center(child: Text(AppStrings.couldNotLoadMessage(AppStrings.details, error))),
       ),
       data: (stats) {
         HabitCompletionNoteItem? selectedDayNote;
@@ -42,8 +42,8 @@ class HabitDetailsPage extends ConsumerWidget {
         }
 
         final noteHeading = selectedDate == today
-            ? 'Today\'s Note'
-            : 'Note for ${dateFormat.format(selectedDate)}';
+            ? AppStrings.todaysNote
+            : AppStrings.noteForDateLabel(dateFormat.format(selectedDate));
 
         return Scaffold(
           appBar: AppBar(
@@ -51,7 +51,7 @@ class HabitDetailsPage extends ConsumerWidget {
             actions: [
               if (selectedDayNote == null)
                 IconButton(
-                  tooltip: 'Add completion note',
+                  tooltip: AppStrings.addCompletionNote,
                   icon: const Icon(Icons.note_add_outlined),
                   onPressed: () =>
                       _openNoteEditor(context, ref, initialDate: selectedDate),
@@ -72,7 +72,7 @@ class HabitDetailsPage extends ConsumerWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(14),
                       child: Text(
-                        'No note for this day yet. Tap the note icon to add one.',
+                        AppStrings.noNoteForDay,
                       ),
                     ),
                   )
@@ -82,7 +82,7 @@ class HabitDetailsPage extends ConsumerWidget {
                       title: Text(selectedDayNote.note),
                       subtitle: Text(dateFormat.format(selectedDayNote.date)),
                       trailing: IconButton(
-                        tooltip: 'Edit note',
+                        tooltip: AppStrings.editNote,
                         icon: const Icon(Icons.edit_outlined),
                         onPressed: () => _openNoteEditor(
                           context,
@@ -95,37 +95,37 @@ class HabitDetailsPage extends ConsumerWidget {
                   ),
                 const SizedBox(height: 18),
                 _StatCard(
-                  title: 'Current Streak',
-                  value: '${stats.currentStreak} check-ins',
+                  title: AppStrings.currentStreak,
+                  value: AppStrings.checkInsLabel(stats.currentStreak),
                 ),
                 const SizedBox(height: 10),
                 _StatCard(
-                  title: 'Best Streak (30-day window)',
-                  value: '${stats.bestStreak} check-ins',
+                  title: AppStrings.bestStreak,
+                  value: AppStrings.checkInsLabel(stats.bestStreak),
                 ),
                 const SizedBox(height: 10),
                 _StatCard(
-                  title: 'Last 30 Days Adherence',
+                  title: AppStrings.last30DaysAdherence,
                   value:
                       '${stats.last30Completed}/${stats.last30Due} (${(stats.last30Rate * 100).toStringAsFixed(1)}%)',
                 ),
                 const SizedBox(height: 18),
                 Text(
-                  'Streak History (30 days)',
+                  AppStrings.streakHistory30Days,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 10),
                 _HabitStreakChart(points: stats.streakHistory),
                 const SizedBox(height: 18),
                 Text(
-                  'Missed-day Heatmap (12 weeks)',
+                  AppStrings.missedDayHeatmap12Weeks,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 10),
                 _HabitHeatmap(cells: stats.heatmap),
                 const SizedBox(height: 18),
                 Text(
-                  'Frequency Adherence (Weekly)',
+                  AppStrings.frequencyAdherenceWeekly,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 10),
@@ -133,7 +133,7 @@ class HabitDetailsPage extends ConsumerWidget {
                 const SizedBox(height: 18),
                 _AchievementsSection(
                   scope: 'habit:$habitId',
-                  title: 'Habit Achievements',
+                  title: AppStrings.habitAchievements,
                   value: achievementsValue,
                 ),
               ],
@@ -172,7 +172,7 @@ class HabitDetailsPage extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Completion Note',
+                    AppStrings.completionNote,
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 10),
@@ -201,7 +201,7 @@ class HabitDetailsPage extends ConsumerWidget {
                     minLines: 3,
                     maxLines: 5,
                     decoration: const InputDecoration(
-                      labelText: 'Note',
+                      labelText: AppStrings.note,
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -217,7 +217,7 @@ class HabitDetailsPage extends ConsumerWidget {
                           ),
                         );
                       },
-                      child: const Text('Save Note'),
+                      child: const Text(AppStrings.saveNote),
                     ),
                   ),
                 ],
@@ -241,259 +241,5 @@ class HabitDetailsPage extends ConsumerWidget {
           note: result.note,
         );
     controller.dispose();
-  }
-}
-
-class _NoteEditResult {
-  const _NoteEditResult({required this.date, required this.note});
-
-  final DateTime date;
-  final String note;
-}
-
-class _HabitStreakChart extends StatelessWidget {
-  const _HabitStreakChart({required this.points});
-
-  final List<HabitStreakPoint> points;
-
-  @override
-  Widget build(BuildContext context) {
-    final maxY = points.fold<int>(0, (prev, item) => max(prev, item.streak));
-    return Card(
-      child: SizedBox(
-        height: 220,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 18, 12, 10),
-          child: LineChart(
-            LineChartData(
-              minY: 0,
-              maxY: max(1, maxY).toDouble(),
-              gridData: const FlGridData(show: true),
-              lineTouchData: LineTouchData(enabled: true),
-              borderData: FlBorderData(show: false),
-              titlesData: FlTitlesData(
-                topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 28,
-                    interval: 1,
-                    getTitlesWidget: (value, meta) {
-                      if (value % 1 != 0) {
-                        return const SizedBox.shrink();
-                      }
-                      return Text(value.toInt().toString());
-                    },
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    interval: 7,
-                    getTitlesWidget: (value, meta) {
-                      final idx = value.toInt();
-                      if (idx < 0 || idx >= points.length) {
-                        return const SizedBox.shrink();
-                      }
-                      return Text(DateFormat('d MMM').format(points[idx].date));
-                    },
-                  ),
-                ),
-              ),
-              lineBarsData: [
-                LineChartBarData(
-                  isCurved: true,
-                  color: Theme.of(context).colorScheme.primary,
-                  barWidth: 3,
-                  dotData: const FlDotData(show: false),
-                  spots: List.generate(
-                    points.length,
-                    (index) => FlSpot(
-                      index.toDouble(),
-                      points[index].streak.toDouble(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HabitHeatmap extends StatelessWidget {
-  const _HabitHeatmap({required this.cells});
-
-  final List<HabitHeatmapCell> cells;
-
-  @override
-  Widget build(BuildContext context) {
-    Color colorFor(HabitHeatmapStatus status) {
-      switch (status) {
-        case HabitHeatmapStatus.completed:
-          return const Color(0xFF2FA36B);
-        case HabitHeatmapStatus.missed:
-          return const Color(0xFFDB5A42);
-        case HabitHeatmapStatus.notScheduled:
-          return const Color(0xFFD7DFE7);
-      }
-    }
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: cells
-                  .map(
-                    (cell) => Tooltip(
-                      message:
-                          '${DateFormat('EEE, d MMM').format(cell.date)}: ${cell.status.name}',
-                      child: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: colorFor(cell.status),
-                          borderRadius: BorderRadius.circular(3),
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
-            const SizedBox(height: 10),
-            const Row(
-              children: [
-                _LegendDot(color: Color(0xFF2FA36B), label: 'Completed'),
-                SizedBox(width: 10),
-                _LegendDot(color: Color(0xFFDB5A42), label: 'Missed'),
-                SizedBox(width: 10),
-                _LegendDot(color: Color(0xFFD7DFE7), label: 'Not scheduled'),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _LegendDot extends StatelessWidget {
-  const _LegendDot({required this.color, required this.label});
-
-  final Color color;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 4),
-        Text(label),
-      ],
-    );
-  }
-}
-
-class _WeeklyAdherenceChart extends StatelessWidget {
-  const _WeeklyAdherenceChart({required this.points});
-
-  final List<HabitWeeklyAdherencePoint> points;
-
-  @override
-  Widget build(BuildContext context) {
-    final maxDue = points.fold<int>(0, (prev, item) => max(prev, item.due));
-    final maxY = max(1, maxDue).toDouble();
-
-    return Card(
-      child: SizedBox(
-        height: 220,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 18, 12, 10),
-          child: BarChart(
-            BarChartData(
-              minY: 0,
-              maxY: maxY,
-              gridData: const FlGridData(show: true),
-              borderData: FlBorderData(show: false),
-              barTouchData: BarTouchData(enabled: true),
-              titlesData: FlTitlesData(
-                topTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                rightTitles: const AxisTitles(
-                  sideTitles: SideTitles(showTitles: false),
-                ),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    interval: 1,
-                    reservedSize: 24,
-                    getTitlesWidget: (value, meta) {
-                      if (value % 1 != 0) {
-                        return const SizedBox.shrink();
-                      }
-                      return Text(value.toInt().toString());
-                    },
-                  ),
-                ),
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    interval: 1,
-                    getTitlesWidget: (value, meta) {
-                      final idx = value.toInt();
-                      if (idx < 0 || idx >= points.length) {
-                        return const SizedBox.shrink();
-                      }
-                      return Text(
-                        DateFormat('MMM d').format(points[idx].weekStart),
-                        style: const TextStyle(fontSize: 10),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              barGroups: List.generate(
-                points.length,
-                (index) => BarChartGroupData(
-                  x: index,
-                  barRods: [
-                    BarChartRodData(
-                      toY: points[index].completed.toDouble(),
-                      width: 16,
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(4),
-                      backDrawRodData: BackgroundBarChartRodData(
-                        show: true,
-                        toY: points[index].due.toDouble(),
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

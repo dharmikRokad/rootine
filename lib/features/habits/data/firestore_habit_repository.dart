@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../core/date_helpers.dart';
-import '../domain/habit.dart';
-import '../domain/habit_category.dart';
-import '../domain/habit_completion.dart';
+import '../domain/entity/habit.dart';
+import '../domain/entity/habit_category.dart';
+import '../domain/entity/habit_completion.dart';
 import 'habit_repository.dart';
 
 class FirestoreHabitRepository implements HabitRepository {
@@ -143,7 +143,9 @@ class FirestoreHabitRepository implements HabitRepository {
   }
 
   @override
-  Future<void> ensureSystemCategories() async {
+  Future<void> ensureSystemCategories(
+    List<({String id, String name, int colorValue})> categories,
+  ) async {
     final snapshot = await _categoriesCollection.limit(1).get();
     if (snapshot.docs.isNotEmpty) {
       return;
@@ -151,7 +153,7 @@ class FirestoreHabitRepository implements HabitRepository {
 
     final batch = _firestore.batch();
     final now = DateTime.now();
-    for (final item in defaultHabitCategories) {
+    for (final item in categories) {
       batch.set(
         _categoriesCollection.doc(item.id),
         HabitCategory(

@@ -1,6 +1,6 @@
-import '../domain/habit.dart';
-import '../domain/habit_category.dart';
-import '../domain/habit_completion.dart';
+import '../domain/entity/habit.dart';
+import '../domain/entity/habit_category.dart';
+import '../domain/entity/habit_completion.dart';
 
 abstract class HabitRepository {
   Stream<List<Habit>> watchHabits();
@@ -29,7 +29,9 @@ abstract class HabitRepository {
 
   Future<void> deleteCategory(String categoryId);
 
-  Future<void> ensureSystemCategories();
+  Future<void> ensureSystemCategories(
+    List<({String id, String name, int colorValue})> categories,
+  );
 
   Future<void> setHabitCompletion({
     required String habitId,
