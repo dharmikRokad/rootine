@@ -36,32 +36,54 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
     final categoriesBootstrap = ref.watch(categoriesBootstrapProvider);
 
     return Scaffold(
+      drawer: Drawer(
+        child: SafeArea(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Habitz',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _authLabel(user),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+              ListTile(
+                leading: const Icon(Icons.archive_outlined),
+                title: const Text('Archived habits'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _openArchivedHabits(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('Sign out'),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await ref.read(authActionsProvider).signOut();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
       appBar: AppBar(
         title: const Text('Habitz'),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: Chip(
-              avatar: const Icon(Icons.cloud_done, size: 18),
-              label: Text(_authLabel(user)),
-            ),
-          ),
-          IconButton(
-            tooltip: 'Archived habits',
-            icon: const Icon(Icons.archive_outlined),
-            onPressed: () => _openArchivedHabits(context),
-          ),
-          PopupMenuButton<String>(
-            tooltip: 'Account',
-            onSelected: (value) async {
-              if (value == 'signOut') {
-                await ref.read(authActionsProvider).signOut();
-              }
-            },
-            itemBuilder: (context) => const [
-              PopupMenuItem(value: 'signOut', child: Text('Sign out')),
-            ],
-          ),
           IconButton(
             tooltip: 'Today',
             icon: const Icon(Icons.today_rounded),

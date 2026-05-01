@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "373360261694",
+    "project_id": "habitz-4571a",
+    "storage_bucket": "habitz-4571a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:373360261694:android:13ffb287bdaae6a6d1af6f",
+        "android_client_info": {
+          "package_name": "com.example.habitz"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "373360261694-lp4r5fdg5nk51vdgtj70n7p3t43g7ijc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBER9aSyiOQX5jyIqhnxDPjwu7V-2Z1kHI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "373360261694-lp4r5fdg5nk51vdgtj70n7p3t43g7ijc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
