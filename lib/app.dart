@@ -6,8 +6,8 @@ import 'core/app_strings.dart';
 import 'core/theme_providers.dart';
 import 'features/auth/presentation/auth_gate_page.dart';
 
-class HabitzApp extends ConsumerWidget {
-  const HabitzApp({super.key});
+class RootineApp extends ConsumerWidget {
+  const RootineApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

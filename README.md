@@ -1,61 +1,116 @@
-# Habitz
+<p align="center">
+  <img src="assets/images/app_logo.png" width="120" height="120" alt="Rootine Logo" />
+</p>
 
-Habitz is a simple but powerful habit builder and tracker app built with Flutter,
-Firebase, and Riverpod. It helps users build consistency with recurring habits
-and gives clear statistics on daily, weekly, and monthly performance.
+<h1 align="center">Rootine</h1>
 
-## Implemented Features
+<p align="center">
+  <strong>Transform your life, one habit at a time.</strong><br />
+  A premium habit-building and tracking application built with Flutter, Firebase, and Riverpod.
+</p>
 
-- Create habits with these frequencies:
-	- Daily
-	- Weekly (specific weekday)
-	- Monthly (specific day of month)
-	- Recurring every n days
-- Track completion by date
-- Browse and update completion state per day
-- View statistics:
-	- Today completion rate
-	- Last 7 days completion rate
-	- Last 30 days completion rate
-	- Best active streak
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white" alt="Flutter" />
+  <img src="https://img.shields.io/badge/Firebase-%23039BE5.svg?style=for-the-badge&logo=firebase" alt="Firebase" />
+  <img src="https://img.shields.io/badge/Material_3-7B1FA2?style=for-the-badge&logo=material-design&logoColor=white" alt="Material 3" />
+</p>
 
-## Tech Stack
+---
 
-- Flutter (Material 3)
-- Riverpod for state management
-- Firebase Core + Cloud Firestore for persistence
-- In-memory repository fallback when Firebase is not configured
+## ✨ Overview
 
-## Run Locally
+Rootine is designed to help you build consistency and achieve your long-term goals through a simple yet powerful habit-tracking experience. Whether you want to drink more water, read daily, or hit the gym, Rootine provides the tools to stay on track and visualize your progress.
 
-1. Install dependencies:
-	 flutter pub get
-2. Run the app:
-	 flutter run
+## 🚀 Features
 
-If Firebase is not configured yet, the app will still run using local in-memory
-data for development.
+### 🔐 Authentication
+- **Secure Sign-In**: Support for Google Sign-In and Email/Password authentication.
+- **Unified Auth Gate**: Seamless transition between login and the main app experience.
 
-## Firebase Setup
+### 📅 Habit Management
+- **Flexible Frequencies**: 
+  - **Daily**: For habits you want to perform every single day.
+  - **Weekly**: Choose specific days of the week.
+  - **Monthly**: Pick a specific day of the month.
+  - **Intervals**: Recurring every `n` days.
+- **Categorization**: Organize your habits into categories for better focus.
+- **Archiving**: Archive completed or paused habits to keep your dashboard clean.
 
-1. Create a Firebase project.
-2. Add your Flutter apps (Android/iOS/web as needed).
-3. Configure Firestore in the Firebase console.
-4. Run FlutterFire CLI to generate platform-specific config:
-	 flutterfire configure
-5. Update app initialization to use generated options (if needed for your setup).
+### 📊 Tracking & Analytics
+- **Day Switcher**: Easily navigate through different days to update completion status.
+- **Insightful Stats**: 
+  - Real-time completion rates (Today, Last 7 Days, Last 30 Days).
+  - Streak tracking to keep your momentum high.
+  - Visual data representation using `fl_chart`.
 
-## Firestore Data Model
+### ⚙️ Advanced Features
+- **Remote Config**: Dynamic application updates via Firebase Remote Config.
+- **Offline Fallback**: In-memory repository support for development without Firebase connectivity.
+- **Swipe Actions**: Quickly manage habits with intuitive slide-to-complete or delete actions.
 
-- habits/{habitId}
-	- name: string
-	- frequency: daily|weekly|monthly|interval
-	- createdAt: int (millisecondsSinceEpoch)
-	- intervalDays: int?
-	- anchor: int?
-	- archived: bool
+## 🏗️ Architecture
 
-- completions/{habitId_yyyy-MM-dd}
-	- habitId: string
-	- date: yyyy-MM-dd
-	- completedAt: int (millisecondsSinceEpoch)
+Rootine follows **Clean Architecture** principles to ensure maintainability and scalability:
+
+- **Domain Layer**: Core business logic and entities (Habits, Completions).
+- **Data Layer**: Repository implementations, Firestore integration, and local storage.
+- **Application Layer**: Business logic for habit tracking and statistics.
+- **Presentation Layer**: Material 3 UI components, Riverpod state management, and responsive layouts.
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Flutter](https://flutter.dev/)
+- **State Management**: [Riverpod 2.x](https://riverpod.dev/)
+- **Backend**: [Firebase](https://firebase.google.com/) (Auth, Firestore, Remote Config)
+- **UI Components**: Material 3, `flutter_slidable`
+- **Charts**: `fl_chart`
+- **Local Storage**: `shared_preferences`
+
+## 🏁 Getting Started
+
+### Prerequisites
+- Flutter SDK (v3.10.3 or higher)
+- Dart SDK
+- Firebase account
+
+### Installation
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/dharmikRokad/rootine.git
+   cd rootine
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   flutter pub get
+   ```
+
+3. **Firebase Setup**:
+   - Create a project in the [Firebase Console](https://console.firebase.google.com/).
+   - Add your Android/iOS/Web apps.
+   - Run the FlutterFire CLI:
+     ```bash
+     flutterfire configure
+     ```
+
+4. **Run the app**:
+   ```bash
+   flutter run
+   ```
+
+## 📂 Project Structure
+
+```text
+lib/
+├── core/             # Shared utilities, themes, and services
+├── features/
+│   ├── auth/         # Authentication logic and pages
+│   └── habits/       # Habit core logic, domain, and UI
+└── main.dart         # Entry point
+```
+
+---
+
+<p align="center">
+  Built with ❤️ for better habits
+</p>

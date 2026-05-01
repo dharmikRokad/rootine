@@ -8,12 +8,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:habitz/app.dart';
-import 'package:habitz/features/auth/presentation/auth_gate_page.dart';
+import 'package:rootine/app.dart';
+import 'package:rootine/features/auth/presentation/auth_gate_page.dart';
 
 void main() {
-  testWidgets('Habitz app renders', (WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: HabitzApp()));
+  testWidgets('Rootine app renders', (WidgetTester tester) async {
+    await tester.pumpWidget(const ProviderScope(child: RootineApp()));
     await tester.pumpAndSettle();
 
     expect(find.byType(AuthGatePage), findsOneWidget);

@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:habitz/firebase_options.dart';
+import 'package:rootine/firebase_options.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
@@ -24,7 +24,7 @@ Future<void> main() async {
         remoteConfigServiceProvider.overrideWithValue(remoteConfigService),
         sharedPreferencesProvider.overrideWithValue(sharedPreferences),
       ],
-      child: const HabitzApp(),
+      child: const RootineApp(),
     ),
   );
 }

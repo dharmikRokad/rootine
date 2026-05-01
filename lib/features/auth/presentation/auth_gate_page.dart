@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:habitz/core/app_images.dart';
+import 'package:rootine/core/app_images.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/app_strings.dart';
