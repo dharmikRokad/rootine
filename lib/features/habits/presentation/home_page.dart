@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../../../core/app_colors.dart';
 import '../../../core/app_strings.dart';
 import '../../../core/date_helpers.dart';
+import '../../../core/theme_providers.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/habits_controller.dart';
 import '../domain/entity/habit.dart';
@@ -100,6 +101,14 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
                 onTap: () {
                   Navigator.of(context).pop();
                   _openArchivedHabits(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.palette_outlined),
+                title: const Text(AppStrings.appearance),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _showThemeSelector(context, ref);
                 },
               ),
               ListTile(
@@ -196,6 +205,56 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
   Future<void> _openManageCategories(BuildContext context) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const ManageCategoriesPage()),
+    );
+  }
+
+  void _showThemeSelector(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        final currentMode = ref.watch(themeModeProvider);
+        return AlertDialog(
+          title: const Text(AppStrings.appearance),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<ThemeMode>(
+                title: const Text(AppStrings.themeSystem),
+                value: ThemeMode.system,
+                groupValue: currentMode,
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(themeModeProvider.notifier).setThemeMode(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+              RadioListTile<ThemeMode>(
+                title: const Text(AppStrings.themeLight),
+                value: ThemeMode.light,
+                groupValue: currentMode,
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(themeModeProvider.notifier).setThemeMode(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+              RadioListTile<ThemeMode>(
+                title: const Text(AppStrings.themeDark),
+                value: ThemeMode.dark,
+                groupValue: currentMode,
+                onChanged: (value) {
+                  if (value != null) {
+                    ref.read(themeModeProvider.notifier).setThemeMode(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

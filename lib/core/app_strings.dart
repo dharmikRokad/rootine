@@ -3,6 +3,10 @@ class AppStrings {
 
   static const manageCategories = 'Manage categories';
   static const archivedHabits = 'Archived habits';
+  static const appearance = 'Appearance';
+  static const themeLight = 'Light';
+  static const themeDark = 'Dark';
+  static const themeSystem = 'System';
   static const signOut = 'Sign out';
   static const signInWithGoogle = 'Sign in with Google';
   static const welcomeToHabitz = 'Welcome to Habitz';

@@ -41,15 +41,21 @@ class _SignInPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration:  BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              AppColors.authGradientStart,
-              AppColors.authGradientMid,
-              AppColors.authGradientEnd,
-            ],
+            colors: Theme.of(context).brightness == Brightness.light
+                ? [
+                    AppColors.authGradientStart,
+                    AppColors.authGradientMid,
+                    AppColors.authGradientEnd,
+                  ]
+                : [
+                    Theme.of(context).colorScheme.surface,
+                    Theme.of(context).colorScheme.surfaceVariant,
+                    Theme.of(context).colorScheme.surface,
+                  ],
           ),
         ),
         child: SafeArea(
