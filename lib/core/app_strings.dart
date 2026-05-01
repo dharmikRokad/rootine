@@ -1,5 +1,5 @@
 class AppStrings {
-  static const appTitle = 'Habitz';
+  static const appTitle = 'Rootine';
 
   static const manageCategories = 'Manage categories';
   static const archivedHabits = 'Archived habits';
@@ -9,7 +9,7 @@ class AppStrings {
   static const themeSystem = 'System';
   static const signOut = 'Sign out';
   static const signInWithGoogle = 'Sign in with Google';
-  static const welcomeToHabitz = 'Welcome to Habitz';
+  static const welcomeToRootine = 'Welcome to Rootine';
   static const welcomeSubtitle =
       'Build streaks, track consistency, and sync your progress securely with Firebase.';
   static const authenticationError = 'Authentication error';

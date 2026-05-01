@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:habitz/core/app_images.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/app_strings.dart';
@@ -41,7 +42,7 @@ class _SignInPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration:  BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -65,10 +66,18 @@ class _SignInPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.track_changes_rounded, size: 72),
+                  Image(
+                    image: AssetImage(AppImages.rootineLogo),
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.fill,
+                    color: Theme.of(context).brightness == Brightness.light
+                        ? null
+                        : AppColors.authGradientEnd,
+                  ),
                   const SizedBox(height: 12),
                   Text(
-                    AppStrings.welcomeToHabitz,
+                    AppStrings.welcomeToRootine,
                     style: Theme.of(context).textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),
