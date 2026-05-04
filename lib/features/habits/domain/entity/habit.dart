@@ -74,6 +74,11 @@ class Habit {
 
   bool isScheduledOn(DateTime day) {
     final selectedDay = normalizeDate(day);
+    final createdDay = normalizeDate(createdAt);
+
+    if (selectedDay.isBefore(createdDay)) {
+      return false;
+    }
 
     switch (frequency) {
       case HabitFrequency.daily:
