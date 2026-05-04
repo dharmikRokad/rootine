@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/date_helpers.dart';
 import '../domain/entity/habit.dart';
 import '../domain/entity/habit_category.dart';
 import '../domain/service/habit_stats_service.dart';
@@ -26,6 +27,7 @@ class HabitActions {
   }) {
     final now = DateTime.now();
     final id = '${now.microsecondsSinceEpoch}_${Random().nextInt(9999)}';
+    final todayKey = dateKey(now);
 
     return _repository.addHabit(
       Habit(
@@ -36,6 +38,8 @@ class HabitActions {
         intervalDays: intervalDays,
         anchor: anchor,
         createdAt: now,
+        startDate: todayKey,
+        scheduleUpdatedAt: todayKey,
       ),
     );
   }
@@ -48,6 +52,10 @@ class HabitActions {
     int? intervalDays,
     int? anchor,
   }) {
+    final scheduleChanged = habit.frequency != frequency ||
+        habit.anchor != anchor ||
+        habit.intervalDays != intervalDays;
+
     return _repository.updateHabit(
       habit.copyWith(
         name: name,
@@ -55,6 +63,8 @@ class HabitActions {
         categoryId: categoryId,
         intervalDays: intervalDays,
         anchor: anchor,
+        scheduleUpdatedAt:
+            scheduleChanged ? dateKey(DateTime.now()) : habit.scheduleUpdatedAt,
       ),
     );
   }
