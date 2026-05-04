@@ -78,18 +78,44 @@ class HabitDetailsPage extends ConsumerWidget {
                   )
                 else
                   Card(
-                    child: ListTile(
-                      title: Text(selectedDayNote.note),
-                      subtitle: Text(dateFormat.format(selectedDayNote.date)),
-                      trailing: IconButton(
-                        tooltip: AppStrings.editNote,
-                        icon: const Icon(Icons.edit_outlined),
-                        onPressed: () => _openNoteEditor(
-                          context,
-                          ref,
-                          initialDate: selectedDayNote!.date,
-                          initialNote: selectedDayNote.note,
-                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 8, bottom: 8),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    selectedDayNote.note,
+                                    style: Theme.of(context).textTheme.bodyLarge,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    dateFormat.format(selectedDayNote.date),
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: AppStrings.editNote,
+                            icon: const Icon(Icons.edit_outlined),
+                            onPressed: () => _openNoteEditor(
+                              context,
+                              ref,
+                              initialDate: selectedDayNote!.date,
+                              initialNote: selectedDayNote.note,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
