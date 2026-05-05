@@ -58,17 +58,12 @@ jobs:
       - name: Build release APK
         run: flutter build apk --release
 
-      # ── 9. Decode Firebase service account ─────────────────────────────────
-      - name: Decode Firebase service account
-        run: |
-          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 --decode > firebase-service-account.json
-
-      # ── 10. Upload to Firebase App Distribution ────────────────────────────
+      # ── 9. Upload to Firebase App Distribution ────────────────────────────
       - name: Upload to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}
-          serviceCredentialsFile: firebase-service-account.json
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: testers
           file: build/app/outputs/flutter-apk/app-release.apk
           releaseNotes: |
