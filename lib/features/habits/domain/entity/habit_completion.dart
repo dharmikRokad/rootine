@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../../../core/date_helpers.dart';
 
 class HabitCompletion {
@@ -19,7 +21,7 @@ class HabitCompletion {
     return {
       'habitId': habitId,
       'date': dateKey(date),
-      'completedAt': completedAt.millisecondsSinceEpoch,
+      'completedAt': Timestamp.fromDate(completedAt),
       'note': note,
     };
   }
@@ -38,9 +40,11 @@ class HabitCompletion {
     }
 
     final completedRaw = map['completedAt'];
-    final completedAt = completedRaw is int
-        ? DateTime.fromMillisecondsSinceEpoch(completedRaw)
-        : DateTime.now();
+    final completedAt = completedRaw is Timestamp
+        ? completedRaw.toDate()
+        : completedRaw is int
+            ? DateTime.fromMillisecondsSinceEpoch(completedRaw)
+            : DateTime.now();
 
     return HabitCompletion(
       habitId: (map['habitId'] as String?) ?? '',

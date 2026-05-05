@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../../../core/app_colors.dart';
 import '../../../../core/app_strings.dart';
 
@@ -24,7 +26,7 @@ class HabitCategory {
       'colorValue': colorValue,
       'iconCodePoint': iconCodePoint,
       'isSystem': isSystem,
-      'createdAt': createdAt.millisecondsSinceEpoch,
+      'createdAt': Timestamp.fromDate(createdAt),
     };
   }
 
@@ -48,9 +50,11 @@ class HabitCategory {
 
   static HabitCategory fromMap(String id, Map<String, dynamic> map) {
     final createdRaw = map['createdAt'];
-    final createdAt = createdRaw is int
-        ? DateTime.fromMillisecondsSinceEpoch(createdRaw)
-        : DateTime.now();
+    final createdAt = createdRaw is Timestamp
+        ? createdRaw.toDate()
+        : createdRaw is int
+            ? DateTime.fromMillisecondsSinceEpoch(createdRaw)
+            : DateTime.now();
 
     return HabitCategory(
       id: id,

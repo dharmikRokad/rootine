@@ -119,6 +119,22 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
                   await ref.read(authActionsProvider).signOut();
                 },
               ),
+              ListTile(
+                leading: Icon(
+                  Icons.delete_forever_outlined,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                title: Text(
+                  AppStrings.deleteAccount,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  await _confirmDeleteAccount(context, ref);
+                },
+              ),
             ],
           ),
         ),
@@ -256,6 +272,44 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
         );
       },
     );
+  }
+
+  Future<void> _confirmDeleteAccount(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(AppStrings.deleteAccountTitle),
+        content: const Text(AppStrings.deleteAccountMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text(AppStrings.cancel),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text(AppStrings.delete),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    try {
+      await ref.read(authActionsProvider).deleteAccount();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppStrings.deleteAccountError(e))),
+        );
+      }
+    }
   }
 
   String _authLabel(dynamic user) {
