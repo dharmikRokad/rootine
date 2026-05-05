@@ -76,43 +76,49 @@ class AuthActions {
   }
 
   Future<void> deleteAccount() async {
-    // Delete all Firestore data first while the user is still authenticated.
-    final repository = ref.read(habitRepositoryProvider);
-    await repository.deleteAllUserData();
-
     final user = _auth.currentUser;
-    if (user != null) {
-      try {
-        await user.delete();
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'requires-recent-login') {
-          // Re-authenticate with Google and retry deletion.
-          await _initializeGoogleIfNeeded();
-          final GoogleSignInAuthentication googleAuth;
-          try {
-            final googleUser = await _googleSignIn.authenticate();
-            googleAuth = googleUser.authentication;
-          } catch (_) {
-            // User cancelled re-authentication; rethrow original error.
-            rethrow;
-          }
-          if (googleAuth.idToken == null) {
-            // No ID token returned; cannot re-authenticate.
-            rethrow;
-          }
-          final credential = GoogleAuthProvider.credential(
-            accessToken: googleAuth.accessToken,
-            idToken: googleAuth.idToken,
-          );
-          await user.reauthenticateWithCredential(credential);
-          await user.delete();
-        } else {
+    if (user == null) return;
+
+    // Step 1: Delete the Firebase Auth account first.
+    // If this fails (e.g. user cancels re-authentication), we abort before
+    // touching any Firestore data, keeping the account fully intact.
+    try {
+      await user.delete();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        // Re-authenticate with Google and retry deletion.
+        await _initializeGoogleIfNeeded();
+        final GoogleSignInAuthentication googleAuth;
+        try {
+          final googleUser = await _googleSignIn.authenticate();
+          googleAuth = googleUser.authentication;
+        } catch (_) {
+          // User cancelled re-authentication; rethrow so no data is lost.
           rethrow;
         }
+        if (googleAuth.idToken == null) {
+          // No ID token — cannot re-authenticate; rethrow so no data is lost.
+          rethrow;
+        }
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        await user.reauthenticateWithCredential(credential);
+        await user.delete();
+      } else {
+        rethrow;
       }
     }
 
-    // Sign out from Google so a fresh sign-in starts a brand-new session.
+    // Step 2: Auth account is gone. Now remove Firestore data.
+    // If this fails the data becomes orphaned under a UID that no longer has
+    // an auth account, so it is permanently inaccessible. The next sign-in
+    // with the same Google account creates a new Firebase UID with fresh data.
+    final repository = ref.read(habitRepositoryProvider);
+    await repository.deleteAllUserData();
+
+    // Step 3: Sign out from Google so the next sign-in starts a fresh session.
     await _initializeGoogleIfNeeded();
     await _googleSignIn.signOut();
   }
