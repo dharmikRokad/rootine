@@ -240,4 +240,30 @@ class FirestoreHabitRepository implements HabitRepository {
     }
     await batch.commit();
   }
+
+  @override
+  Future<void> deleteAllUserData() async {
+    await _deleteCollection(_habitsCollection);
+    await _deleteCollection(_completionsCollection);
+    await _deleteCollection(_categoriesCollection);
+    await _deleteCollection(_achievementUnlocksCollection);
+    await _userDoc.delete();
+  }
+
+  Future<void> _deleteCollection(
+    CollectionReference<Map<String, dynamic>> collection,
+  ) async {
+    // 300 keeps each batch comfortably under Firestore's 500-operation limit
+    // while staying within reasonable memory bounds for large collections.
+    const batchSize = 300;
+    while (true) {
+      final snapshot = await collection.limit(batchSize).get();
+      if (snapshot.docs.isEmpty) break;
+      final batch = _firestore.batch();
+      for (final doc in snapshot.docs) {
+        batch.delete(doc.reference);
+      }
+      await batch.commit();
+    }
+  }
 }

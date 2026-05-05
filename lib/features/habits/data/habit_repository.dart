@@ -49,4 +49,6 @@ abstract class HabitRepository {
   Future<void> ensureAchievementUnlocked(String achievementKey);
 
   Future<void> markAchievementsCelebrated(List<String> achievementKeys);
+
+  Future<void> deleteAllUserData();
 }

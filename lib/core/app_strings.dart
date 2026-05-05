@@ -8,6 +8,12 @@ class AppStrings {
   static const themeDark = 'Dark';
   static const themeSystem = 'System';
   static const signOut = 'Sign out';
+  static const deleteAccount = 'Delete Account';
+  static const deleteAccountTitle = 'Delete account?';
+  static const deleteAccountMessage =
+      'This will permanently delete your account and all your habit data. This action cannot be undone.';
+  static String deleteAccountError(Object error) =>
+      'Could not delete account: $error';
   static const signInWithGoogle = 'Sign in with Google';
   static const welcomeToRootine = 'Welcome to Rootine';
   static const welcomeSubtitle =
