@@ -101,7 +101,7 @@ class AuthActions {
           rethrow;
         }
         final credential = GoogleAuthProvider.credential(
-          accessToken: googleAuth.accessToken,
+          accessToken: null,
           idToken: googleAuth.idToken,
         );
         await user.reauthenticateWithCredential(credential);
