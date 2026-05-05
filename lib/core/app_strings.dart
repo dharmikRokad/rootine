@@ -144,8 +144,14 @@ class AppStrings {
   static const bestStreak = 'Best Streak (30-day window)';
   static const last30DaysAdherence = 'Last 30 Days Adherence';
   static const streakHistory30Days = 'Streak History (30 days)';
+  static const streakHistory30DaysDesc =
+      'Consecutive days you completed this habit, tracked over the last 30 days.';
   static const missedDayHeatmap12Weeks = 'Missed-day Heatmap (12 weeks)';
+  static const missedDayHeatmap12WeeksDesc =
+      'Visual overview of completed, missed, and unscheduled days over the past 12 weeks.';
   static const frequencyAdherenceWeekly = 'Frequency Adherence (Weekly)';
+  static const frequencyAdherenceWeeklyDesc =
+      'Completed vs. scheduled check-ins grouped by week.';
   static const habitAchievements = 'Habit Achievements';
   static const completionNotes = 'Completion Notes';
   static const completed = 'Completed';
@@ -162,9 +168,17 @@ class AppStrings {
   static const bestActiveStreak = 'Best Active Streak';
   static const milestones = 'Milestones';
   static const completionTrend14Days = '14-Day Completion Trend';
+  static const completionTrend14DaysDesc =
+      'Daily completion rate across all habits over the last 14 days.';
   static const last7DaysOutput = 'Last 7 Days Output';
+  static const last7DaysOutputDesc =
+      'Number of completed vs. scheduled habit check-ins for each day this week.';
   static const rolling7DayAdherence = 'Rolling 7-Day Adherence';
+  static const rolling7DayAdherenceDesc =
+      'Your 7-day completion rate rolling through time — shows momentum trends.';
   static const weekdayWinRate = 'Weekday Win Rate';
+  static const weekdayWinRateDesc =
+      'Your average completion rate for each day of the week.';
   static const ratesCountOnlyScheduledDays =
       'Rates count only days where a habit was scheduled.';
 

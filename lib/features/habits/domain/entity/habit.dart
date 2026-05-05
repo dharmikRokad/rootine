@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../../../core/date_helpers.dart';
 
 enum HabitFrequency { daily, weekly, monthly, interval }
@@ -73,7 +75,7 @@ class Habit {
     return {
       'name': name,
       'frequency': frequency.name,
-      'createdAt': createdAt.millisecondsSinceEpoch,
+      'createdAt': Timestamp.fromDate(createdAt),
       'categoryId': categoryId,
       'intervalDays': intervalDays,
       'anchor': anchor,
@@ -164,9 +166,11 @@ class Habit {
     // Fix Comment 1: use a far-past epoch as the fallback so that legacy
     // habits without a stored createdAt timestamp preserve all historical
     // data instead of being treated as "created today".
-    final createdAt = createdRaw is int
-        ? DateTime.fromMillisecondsSinceEpoch(createdRaw)
-        : DateTime(2000);
+    final createdAt = createdRaw is Timestamp
+        ? createdRaw.toDate()
+        : createdRaw is int
+            ? DateTime.fromMillisecondsSinceEpoch(createdRaw)
+            : DateTime(2000);
 
     return Habit(
       id: id,

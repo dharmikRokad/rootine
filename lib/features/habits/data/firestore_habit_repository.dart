@@ -79,7 +79,7 @@ class FirestoreHabitRepository implements HabitRepository {
     return _achievementUnlocksCollection.snapshots().map((snapshot) {
       return {
         for (final doc in snapshot.docs)
-          doc.id: (doc.data()['celebratedAt'] as int?) != null,
+          doc.id: doc.data()['celebratedAt'] != null,
       };
     });
   }
@@ -205,7 +205,7 @@ class FirestoreHabitRepository implements HabitRepository {
     return doc.set({
       'habitId': habitId,
       'date': dateKey(normalized),
-      'completedAt': DateTime.now().millisecondsSinceEpoch,
+      'completedAt': Timestamp.now(),
       'note': note.trim(),
     }, SetOptions(merge: true));
   }
@@ -220,7 +220,7 @@ class FirestoreHabitRepository implements HabitRepository {
       }
 
       transaction.set(doc, {
-        'unlockedAt': DateTime.now().millisecondsSinceEpoch,
+        'unlockedAt': Timestamp.now(),
         'celebratedAt': null,
       });
     });
@@ -233,7 +233,7 @@ class FirestoreHabitRepository implements HabitRepository {
     }
 
     final batch = _firestore.batch();
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = Timestamp.now();
     for (final key in achievementKeys) {
       final doc = _achievementUnlocksCollection.doc(key);
       batch.set(doc, {'celebratedAt': now}, SetOptions(merge: true));
