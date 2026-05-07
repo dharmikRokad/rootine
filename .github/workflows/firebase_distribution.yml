@@ -46,7 +46,7 @@ jobs:
           storePassword=${{ secrets.KEYSTORE_PASSWORD }}
           keyPassword=${{ secrets.KEY_PASSWORD }}
           keyAlias=${{ secrets.KEY_ALIAS }}
-          storeFile=app/keystore.jks
+          storeFile=keystore.jks
           EOF
 
       # ── 8. Build release APK ───────────────────────────────────────────────
