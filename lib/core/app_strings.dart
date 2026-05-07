@@ -15,6 +15,7 @@ class AppStrings {
   static String deleteAccountError(Object error) =>
       'Could not delete account: $error';
   static const signInWithGoogle = 'Sign in with Google';
+  static const signingIn = 'Signing in...';
   static const welcomeToRootine = 'Welcome to Rootine';
   static const welcomeSubtitle =
       'Build streaks, track consistency, and sync your progress securely with Firebase.';

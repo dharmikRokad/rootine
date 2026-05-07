@@ -33,13 +33,29 @@ class AuthGatePage extends ConsumerWidget {
   }
 }
 
-class _SignInPage extends StatelessWidget {
+class _SignInPage extends ConsumerWidget {
   const _SignInPage({required this.onSignIn});
 
   final Future<void> Function() onSignIn;
 
+  void _handleSignIn(WidgetRef ref) async {
+    ref.read(signInLoadingProvider.notifier).state = true;
+    ref.read(signInErrorProvider.notifier).state = null;
+
+    try {
+      await onSignIn();
+    } catch (e) {
+      ref.read(signInErrorProvider.notifier).state =
+          'Sign-in failed: ${e.toString()}';
+      ref.read(signInLoadingProvider.notifier).state = false;
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isLoading = ref.watch(signInLoadingProvider);
+    final errorMessage = ref.watch(signInErrorProvider);
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -87,10 +103,38 @@ class _SignInPage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 20),
+                  if (errorMessage != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        errorMessage,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontSize: 12,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   FilledButton.icon(
-                    onPressed: onSignIn,
-                    icon: const Icon(Icons.login),
-                    label: const Text(AppStrings.signInWithGoogle),
+                    onPressed: isLoading ? null : () => _handleSignIn(ref),
+                    icon: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.login),
+                    label: Text(
+                      isLoading
+                          ? AppStrings.signingIn
+                          : AppStrings.signInWithGoogle,
+                    ),
                   ),
                 ],
               ),

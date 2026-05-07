@@ -26,6 +26,10 @@ final authActionsProvider = Provider<AuthActions>((ref) {
   return AuthActions(ref);
 });
 
+final signInLoadingProvider = StateProvider<bool>((ref) => false);
+
+final signInErrorProvider = StateProvider<String?>((ref) => null);
+
 class AuthActions {
   AuthActions(this.ref);
 
@@ -48,25 +52,30 @@ class AuthActions {
   }
 
   Future<void> signInWithGoogle() async {
-    await _initializeGoogleIfNeeded();
+    try {
+      await _initializeGoogleIfNeeded();
 
-    final googleUser = await _googleSignIn.authenticate();
-    final googleAuth = googleUser.authentication;
-    if (googleAuth.idToken == null) {
-      return;
+      final googleUser = await _googleSignIn.authenticate();
+
+      final googleAuth = googleUser.authentication;
+      if (googleAuth.idToken == null) {
+        throw Exception('Failed to obtain ID token from Google Sign-In');
+      }
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: null,
+        idToken: googleAuth.idToken,
+      );
+
+      final current = _auth.currentUser;
+      if (current != null && current.isAnonymous) {
+        await current.delete();
+      }
+
+      await _auth.signInWithCredential(credential);
+    } catch (e) {
+      rethrow;
     }
-
-    final credential = GoogleAuthProvider.credential(
-      accessToken: null,
-      idToken: googleAuth.idToken,
-    );
-
-    final current = _auth.currentUser;
-    if (current != null && current.isAnonymous) {
-      await current.delete();
-    }
-
-    await _auth.signInWithCredential(credential);
   }
 
   Future<void> signOut() async {
