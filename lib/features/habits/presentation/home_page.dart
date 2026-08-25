@@ -44,163 +44,308 @@ class HabitsHomePage extends ConsumerStatefulWidget {
   ConsumerState<HabitsHomePage> createState() => _HabitsHomePageState();
 }
 
-class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
+class _HabitsHomePageState extends ConsumerState<HabitsHomePage>
+    with SingleTickerProviderStateMixin {
   int _selectedTab = 0;
+  late AnimationController _drawerController;
+  bool _isDrawerOpen = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _drawerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 260),
+    );
+  }
+
+  @override
+  void dispose() {
+    _drawerController.dispose();
+    super.dispose();
+  }
+
+  void _toggleDrawer() {
+    if (_isDrawerOpen) {
+      _drawerController.reverse();
+    } else {
+      _drawerController.forward();
+    }
+    setState(() {
+      _isDrawerOpen = !_isDrawerOpen;
+    });
+  }
+
+  void _closeDrawer() {
+    if (_isDrawerOpen) {
+      _drawerController.reverse();
+      setState(() {
+        _isDrawerOpen = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).valueOrNull;
     final selectedDate = ref.watch(selectedDateProvider);
     final categoriesBootstrap = ref.watch(categoriesBootstrapProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      drawer: Drawer(
-        child: SafeArea(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      AppStrings.appTitle,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _authLabel(user),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.category_outlined),
-                title: const Text(AppStrings.manageCategories),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _openManageCategories(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.archive_outlined),
-                title: const Text(AppStrings.archivedHabits),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _openArchivedHabits(context);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.palette_outlined),
-                title: const Text(AppStrings.appearance),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _showThemeSelector(context, ref);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.logout),
-                title: const Text(AppStrings.signOut),
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  await ref.read(authActionsProvider).signOut();
-                },
-              ),
-              ListTile(
-                leading: Icon(
-                  Icons.delete_forever_outlined,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                title: Text(
-                  AppStrings.deleteAccount,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.error,
+    return PopScope(
+      canPop: !_isDrawerOpen,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _isDrawerOpen) {
+          _closeDrawer();
+        }
+      },
+      child: Stack(
+        children: [
+          // ── Hidden Background Animated Drawer Menu ─────────────────
+          Scaffold(
+            backgroundColor: isDark
+                ? const Color(0xFF0F172A)
+                : theme.colorScheme.surfaceContainerLowest,
+            body: SafeArea(
+              child: SizedBox(
+                width: 220,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 24,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // User Header Card
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 22,
+                            backgroundColor: theme.colorScheme.primaryContainer,
+                            child: Icon(
+                              Icons.person_outline,
+                              size: 24,
+                              color: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppStrings.nijDarshan,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _authLabel(user),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      const Divider(height: 1),
+                      const SizedBox(height: 16),
+
+                      // Menu Options List
+                      _DrawerMenuItem(
+                        icon: Icons.category_outlined,
+                        label: AppStrings.manageCategories,
+                        onTap: () {
+                          _closeDrawer();
+                          _openManageCategories(context);
+                        },
+                      ),
+                      _DrawerMenuItem(
+                        icon: Icons.archive_outlined,
+                        label: AppStrings.archivedHabits,
+                        onTap: () {
+                          _closeDrawer();
+                          _openArchivedHabits(context);
+                        },
+                      ),
+                      _DrawerMenuItem(
+                        icon: Icons.palette_outlined,
+                        label: AppStrings.appearance,
+                        onTap: () {
+                          _closeDrawer();
+                          _showThemeSelector(context, ref);
+                        },
+                      ),
+                      const Spacer(),
+                      const Divider(height: 1),
+                      const SizedBox(height: 12),
+                      _DrawerMenuItem(
+                        icon: Icons.logout,
+                        label: AppStrings.signOut,
+                        onTap: () async {
+                          _closeDrawer();
+                          await ref.read(authActionsProvider).signOut();
+                        },
+                      ),
+                      _DrawerMenuItem(
+                        icon: Icons.delete_forever_outlined,
+                        label: AppStrings.deleteAccount,
+                        color: theme.colorScheme.error,
+                        onTap: () async {
+                          _closeDrawer();
+                          await _confirmDeleteAccount(context, ref);
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                onTap: () async {
-                  Navigator.of(context).pop();
-                  await _confirmDeleteAccount(context, ref);
-                },
               ),
-            ],
-          ),
-        ),
-      ),
-      appBar: AppBar(
-        title: const Text(AppStrings.appTitle),
-        actions: [
-          if (_selectedTab == 0)
-            _DaySwitcher(
-              date: selectedDate,
-              onPrevious: () {
-                ref.read(selectedDateProvider.notifier).state = normalizeDate(
-                  selectedDate.subtract(const Duration(days: 1)),
-                );
-              },
-              onNext: () {
-                ref.read(selectedDateProvider.notifier).state = normalizeDate(
-                  selectedDate.add(const Duration(days: 1)),
-                );
-              },
-              onToday: () {
-                ref.read(selectedDateProvider.notifier).state = normalizeDate(
-                  DateTime.now(),
-                );
-              },
-              onPickDate: (pickedDate) {
-                ref.read(selectedDateProvider.notifier).state = normalizeDate(
-                  pickedDate,
-                );
-              },
             ),
-        ],
-      ),
-      body: categoriesBootstrap.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Text(
-            AppStrings.couldNotLoadMessage(AppStrings.categories, error),
+          ),
+
+          // ── Main Screen Layer (Slide, Scale & Corner Animation) ──────
+          AnimatedBuilder(
+            animation: _drawerController,
+            builder: (context, child) {
+              final value = _drawerController.value;
+              final slide = 210.0 * value;
+              final scale = 1.0 - (0.12 * value);
+              final borderRadius = 24.0 * value;
+
+              return Transform(
+                transform: Matrix4.identity()
+                  ..translate(slide)
+                  ..scale(scale),
+                alignment: Alignment.centerLeft,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: value > 0
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 20,
+                                spreadRadius: 2,
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Stack(
+                      children: [
+                        child!,
+                        if (_isDrawerOpen)
+                          Positioned.fill(
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: _closeDrawer,
+                              child: Container(
+                                color: Colors.transparent,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                tooltip: 'Menu',
+                icon: AnimatedIcon(
+                  icon: AnimatedIcons.menu_close,
+                  progress: _drawerController,
+                ),
+                onPressed: _toggleDrawer,
+              ),
+              title: const Text(AppStrings.appTitle),
+              actions: [
+                if (_selectedTab == 0)
+                  _DaySwitcher(
+                    date: selectedDate,
+                    onPrevious: () {
+                      ref.read(selectedDateProvider.notifier).state =
+                          normalizeDate(
+                        selectedDate.subtract(const Duration(days: 1)),
+                      );
+                    },
+                    onNext: () {
+                      ref.read(selectedDateProvider.notifier).state =
+                          normalizeDate(
+                        selectedDate.add(const Duration(days: 1)),
+                      );
+                    },
+                    onToday: () {
+                      ref.read(selectedDateProvider.notifier).state =
+                          normalizeDate(
+                        DateTime.now(),
+                      );
+                    },
+                    onPickDate: (pickedDate) {
+                      ref.read(selectedDateProvider.notifier).state =
+                          normalizeDate(
+                        pickedDate,
+                      );
+                    },
+                  ),
+              ],
+            ),
+            body: categoriesBootstrap.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Center(
+                child: Text(
+                  AppStrings.couldNotLoadMessage(AppStrings.categories, error),
+                ),
+              ),
+              data: (_) => IndexedStack(
+                index: _selectedTab,
+                children: const [_TrackTab(), _StatsTab()],
+              ),
+            ),
+            floatingActionButton: _selectedTab == 0
+                ? FloatingActionButton.extended(
+                    onPressed: () => _openCreateHabitSheet(context),
+                    icon: const Icon(Icons.add),
+                    label: const Text(AppStrings.newHabit),
+                  )
+                : null,
+            bottomNavigationBar: NavigationBar(
+              selectedIndex: _selectedTab,
+              onDestinationSelected: (index) {
+                if (_isDrawerOpen) _closeDrawer();
+                setState(() {
+                  _selectedTab = index;
+                });
+              },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.check_circle_outline),
+                  selectedIcon: Icon(Icons.check_circle),
+                  label: AppStrings.track,
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.analytics_outlined),
+                  selectedIcon: Icon(Icons.analytics),
+                  label: AppStrings.stats,
+                ),
+              ],
+            ),
           ),
         ),
-        data: (_) => IndexedStack(
-          index: _selectedTab,
-          children: const [_TrackTab(), _StatsTab()],
-        ),
-      ),
-      floatingActionButton: _selectedTab == 0
-          ? FloatingActionButton.extended(
-              onPressed: () => _openCreateHabitSheet(context),
-              icon: const Icon(Icons.add),
-              label: const Text(AppStrings.newHabit),
-            )
-          : null,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedTab,
-        onDestinationSelected: (index) {
-          setState(() {
-            _selectedTab = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.check_circle_outline),
-            selectedIcon: Icon(Icons.check_circle),
-            label: AppStrings.track,
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.analytics_outlined),
-            selectedIcon: Icon(Icons.analytics),
-            label: AppStrings.stats,
-          ),
-        ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 
   Future<void> _openCreateHabitSheet(BuildContext context) async {
     await showModalBottomSheet<void>(
@@ -272,7 +417,10 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
     );
   }
 
-  Future<void> _confirmDeleteAccount(BuildContext context, WidgetRef ref) async {
+  Future<void> _confirmDeleteAccount(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -340,5 +488,55 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
 
     final short = min(6, uid.length);
     return '${AppStrings.userPrefix}${uid.substring(0, short)}';
+  }
+}
+
+class _DrawerMenuItem extends StatelessWidget {
+  const _DrawerMenuItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final itemColor = color ?? theme.colorScheme.onSurface;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              children: [
+                Icon(icon, size: 20, color: itemColor),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: itemColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
