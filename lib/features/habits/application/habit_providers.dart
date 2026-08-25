@@ -99,6 +99,8 @@ final dueHabitsForSelectedDateProvider = Provider<AsyncValue<List<Habit>>>((
   );
 });
 
+final selectedAnalyticsHabitIdProvider = StateProvider<String?>((_) => null);
+
 final completionSetForSelectedDateProvider = Provider<AsyncValue<Set<String>>>((
   ref,
 ) {
@@ -108,6 +110,7 @@ final completionSetForSelectedDateProvider = Provider<AsyncValue<Set<String>>>((
   return completionsValue.whenData(
     (completions) => completions
         .where((completion) => dateKey(completion.date) == dateKey(date))
+        .where((completion) => completion.isCompleted)
         .map((completion) => completion.habitId)
         .toSet(),
   );

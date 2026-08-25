@@ -2,7 +2,6 @@ import 'dart:math';
 
 import '../../../../core/date_helpers.dart';
 import '../entity/habit.dart';
-import '../entity/habit_achievement.dart';
 import '../entity/habit_completion.dart';
 import '../entity/habit_detail_stats.dart';
 import '../entity/habit_stats.dart';
@@ -15,6 +14,7 @@ class HabitStatsService {
     final today = normalizeDate(DateTime.now());
     final completedKeys = completions
         .where((completion) => completion.habitId == habit.id)
+        .where((completion) => completion.isCompleted)
         .map((completion) => dateKey(completion.date))
         .toSet();
 
@@ -62,8 +62,22 @@ class HabitStatsService {
       }
     }
 
+    final earliestCompletionDate = completions
+        .where((completion) => completion.habitId == habit.id)
+        .map((completion) => completion.date)
+        .fold<DateTime?>(null, (min, d) => min == null || d.isBefore(min) ? d : min);
+
+    final baseDate = earliestCompletionDate != null && earliestCompletionDate.isBefore(habit.createdAt)
+        ? earliestCompletionDate
+        : habit.createdAt;
+
+    var daysBack = today.difference(normalizeDate(baseDate)).inDays + 30;
+    if (daysBack < 365) {
+      daysBack = 365;
+    }
+
     final heatmap = <HabitHeatmapCell>[];
-    for (var i = 83; i >= 0; i--) {
+    for (var i = daysBack; i >= 0; i--) {
       final day = today.subtract(Duration(days: i));
       HabitHeatmapStatus status;
       if (!habit.isScheduledOn(day)) {
@@ -137,6 +151,7 @@ class HabitStatsService {
     final completionIndex = <String, Set<String>>{};
 
     for (final completion in completions) {
+      if (!completion.isCompleted) continue;
       final key = dateKey(completion.date);
       final set = completionIndex.putIfAbsent(key, () => <String>{});
       set.add(completion.habitId);
@@ -287,136 +302,5 @@ class HabitStatsService {
       );
     }
     return points;
-  }
-
-  static List<HabitAchievement> buildOverallAchievements(
-    List<Habit> habits,
-    List<HabitCompletion> completions,
-    HabitStats stats,
-  ) {
-    final completionCount = completions.length;
-    final categoriesUsed = habits
-        .where((habit) => habit.categoryId != null)
-        .map((h) => h.categoryId)
-        .toSet()
-        .length;
-    final perfectToday =
-        stats.todayTotal > 0 && stats.todayCompleted == stats.todayTotal;
-
-    return [
-      HabitAchievement(
-        id: 'first_checkin',
-        title: 'First Check-in',
-        description: 'Complete your first habit check-in.',
-        unlocked: completionCount >= 1,
-        progress: progress(completionCount, 1),
-        targetLabel: '$completionCount/1 completions',
-      ),
-      HabitAchievement(
-        id: 'week_streak',
-        title: 'Week Warrior',
-        description: 'Reach a 7-check-in streak on any habit.',
-        unlocked: stats.bestStreak >= 7,
-        progress: progress(stats.bestStreak, 7),
-        targetLabel: '${stats.bestStreak}/7 streak',
-      ),
-      HabitAchievement(
-        id: 'monthly_master',
-        title: 'Monthly Master',
-        description: 'Hit 80% completion rate over the last 30 days.',
-        unlocked: stats.monthRate >= 0.8 && stats.last30Due >= 10,
-        progress: progress((stats.monthRate * 100).round(), 80),
-        targetLabel: '${(stats.monthRate * 100).toStringAsFixed(0)}%/80%',
-      ),
-      HabitAchievement(
-        id: 'perfect_today',
-        title: 'Perfect Day',
-        description: 'Complete every scheduled habit for today.',
-        unlocked: perfectToday,
-        progress: stats.todayTotal == 0
-            ? 0
-            : progress(stats.todayCompleted, stats.todayTotal),
-        targetLabel: '${stats.todayCompleted}/${stats.todayTotal} today',
-      ),
-      HabitAchievement(
-        id: 'category_explorer',
-        title: 'Category Explorer',
-        description: 'Track habits across 3 different categories.',
-        unlocked: categoriesUsed >= 3,
-        progress: progress(categoriesUsed, 3),
-        targetLabel: '$categoriesUsed/3 categories',
-      ),
-    ];
-  }
-
-  static List<HabitAchievement> buildHabitAchievements(HabitDetailStats stats) {
-    final notesCount = stats.recentNotes.length;
-
-    return [
-      HabitAchievement(
-        id: 'first_rep',
-        title: 'First Rep',
-        description: 'Complete this habit at least once.',
-        unlocked: stats.bestStreak >= 1,
-        progress: progress(stats.bestStreak, 1),
-        targetLabel: '${stats.bestStreak}/1 streak',
-      ),
-      HabitAchievement(
-        id: 'streak_3',
-        title: 'Triple Streak',
-        description: 'Reach a 3-check-in streak on this habit.',
-        unlocked: stats.bestStreak >= 3,
-        progress: progress(stats.bestStreak, 3),
-        targetLabel: '${stats.bestStreak}/3 streak',
-      ),
-      HabitAchievement(
-        id: 'streak_7',
-        title: 'Unbreakable Week',
-        description: 'Reach a 7-check-in streak on this habit.',
-        unlocked: stats.bestStreak >= 7,
-        progress: progress(stats.bestStreak, 7),
-        targetLabel: '${stats.bestStreak}/7 streak',
-      ),
-      HabitAchievement(
-        id: 'habit_consistency',
-        title: 'Precision Mode',
-        description: 'Achieve 90% adherence for this habit over 30 days.',
-        unlocked: stats.last30Rate >= 0.9 && stats.last30Due >= 10,
-        progress: progress((stats.last30Rate * 100).round(), 90),
-        targetLabel: '${(stats.last30Rate * 100).toStringAsFixed(0)}%/90%',
-      ),
-      HabitAchievement(
-        id: 'note_keeper',
-        title: 'Reflective Runner',
-        description: 'Capture 5 completion notes for this habit.',
-        unlocked: notesCount >= 5,
-        progress: progress(notesCount, 5),
-        targetLabel: '$notesCount/5 notes',
-      ),
-    ];
-  }
-
-  static double progress(int value, int target) {
-    if (target <= 0) {
-      return 0;
-    }
-    return (value / target).clamp(0, 1).toDouble();
-  }
-
-  static String scopedAchievementKey(String scope, String achievementId) {
-    return '$scope::$achievementId';
-  }
-
-  static List<HabitAchievement> withCelebrationState(
-    List<HabitAchievement> achievements, {
-    required String scope,
-    required Map<String, bool> celebrationStatus,
-  }) {
-    return achievements.map((achievement) {
-      final key = scopedAchievementKey(scope, achievement.id);
-      final celebrated = celebrationStatus[key];
-      final isNewlyUnlocked = achievement.unlocked && celebrated == false;
-      return achievement.copyWith(isNewlyUnlocked: isNewlyUnlocked);
-    }).toList();
   }
 }

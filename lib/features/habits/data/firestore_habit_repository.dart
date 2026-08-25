@@ -24,9 +24,6 @@ class FirestoreHabitRepository implements HabitRepository {
   CollectionReference<Map<String, dynamic>> get _categoriesCollection =>
       _userDoc.collection('categories');
 
-    CollectionReference<Map<String, dynamic>> get _achievementUnlocksCollection =>
-      _userDoc.collection('achievementUnlocks');
-
   @override
   Stream<List<Habit>> watchHabits() {
     return _habitsCollection
@@ -68,20 +65,10 @@ class FirestoreHabitRepository implements HabitRepository {
   @override
   Stream<List<HabitCompletion>> watchCompletions() {
     return _completionsCollection.snapshots().map(
-      (snapshot) => snapshot.docs
-          .map((doc) => HabitCompletion.fromMap(doc.data()))
-          .toList(),
-    );
-  }
-
-  @override
-  Stream<Map<String, bool>> watchAchievementCelebrationStatus() {
-    return _achievementUnlocksCollection.snapshots().map((snapshot) {
-      return {
-        for (final doc in snapshot.docs)
-          doc.id: doc.data()['celebratedAt'] != null,
-      };
-    });
+          (snapshot) => snapshot.docs
+              .map((doc) => HabitCompletion.fromMap(doc.data()))
+              .toList(),
+        );
   }
 
   @override
@@ -174,13 +161,25 @@ class FirestoreHabitRepository implements HabitRepository {
     required DateTime date,
     required bool isDone,
     String? note,
-  }) {
+  }) async {
     final normalized = normalizeDate(date);
     final id = '${habitId}_${dateKey(normalized)}';
     final doc = _completionsCollection.doc(id);
 
-    if (!isDone) {
-      return doc.delete();
+    final cleanNote = note?.trim();
+    if (!isDone && (cleanNote == null || cleanNote.isEmpty)) {
+      final snap = await doc.get();
+      if (snap.exists) {
+        final existingNote = snap.data()?['note'] as String?;
+        if (existingNote == null || existingNote.trim().isEmpty) {
+          return doc.delete();
+        } else {
+          return doc.set({
+            'isCompleted': false,
+          }, SetOptions(merge: true));
+        }
+      }
+      return;
     }
 
     return doc.set(
@@ -188,8 +187,10 @@ class FirestoreHabitRepository implements HabitRepository {
         habitId: habitId,
         date: normalized,
         completedAt: DateTime.now(),
-        note: note,
+        isCompleted: isDone,
+        note: cleanNote,
       ).toMap(),
+      SetOptions(merge: true),
     );
   }
 
@@ -202,43 +203,14 @@ class FirestoreHabitRepository implements HabitRepository {
     final normalized = normalizeDate(date);
     final id = '${habitId}_${dateKey(normalized)}';
     final doc = _completionsCollection.doc(id);
+    final cleanNote = note.trim();
+
     return doc.set({
       'habitId': habitId,
       'date': dateKey(normalized),
       'completedAt': Timestamp.now(),
-      'note': note.trim(),
+      'note': cleanNote.isEmpty ? null : cleanNote,
     }, SetOptions(merge: true));
-  }
-
-  @override
-  Future<void> ensureAchievementUnlocked(String achievementKey) async {
-    final doc = _achievementUnlocksCollection.doc(achievementKey);
-    await _firestore.runTransaction((transaction) async {
-      final snapshot = await transaction.get(doc);
-      if (snapshot.exists) {
-        return;
-      }
-
-      transaction.set(doc, {
-        'unlockedAt': Timestamp.now(),
-        'celebratedAt': null,
-      });
-    });
-  }
-
-  @override
-  Future<void> markAchievementsCelebrated(List<String> achievementKeys) async {
-    if (achievementKeys.isEmpty) {
-      return;
-    }
-
-    final batch = _firestore.batch();
-    final now = Timestamp.now();
-    for (final key in achievementKeys) {
-      final doc = _achievementUnlocksCollection.doc(key);
-      batch.set(doc, {'celebratedAt': now}, SetOptions(merge: true));
-    }
-    await batch.commit();
   }
 
   @override
@@ -246,15 +218,12 @@ class FirestoreHabitRepository implements HabitRepository {
     await _deleteCollection(_habitsCollection);
     await _deleteCollection(_completionsCollection);
     await _deleteCollection(_categoriesCollection);
-    await _deleteCollection(_achievementUnlocksCollection);
     await _userDoc.delete();
   }
 
   Future<void> _deleteCollection(
     CollectionReference<Map<String, dynamic>> collection,
   ) async {
-    // 300 keeps each batch comfortably under Firestore's 500-operation limit
-    // while staying within reasonable memory bounds for large collections.
     const batchSize = 300;
     while (true) {
       final snapshot = await collection.limit(batchSize).get();

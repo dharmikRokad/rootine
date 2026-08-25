@@ -11,8 +11,6 @@ abstract class HabitRepository {
 
   Stream<List<HabitCompletion>> watchCompletions();
 
-  Stream<Map<String, bool>> watchAchievementCelebrationStatus();
-
   Future<void> addHabit(Habit habit);
 
   Future<void> updateHabit(Habit habit);
@@ -45,10 +43,6 @@ abstract class HabitRepository {
     required DateTime date,
     required String note,
   });
-
-  Future<void> ensureAchievementUnlocked(String achievementKey);
-
-  Future<void> markAchievementsCelebrated(List<String> achievementKeys);
 
   Future<void> deleteAllUserData();
 }

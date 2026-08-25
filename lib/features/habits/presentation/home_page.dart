@@ -13,8 +13,8 @@ import '../../../core/theme_providers.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/habits_controller.dart';
 import '../domain/entity/habit.dart';
-import '../domain/entity/habit_achievement.dart';
 import '../domain/entity/habit_category.dart';
+import '../domain/entity/habit_completion.dart';
 import '../domain/entity/habit_detail_stats.dart';
 import '../domain/habit_extensions.dart';
 import '../domain/entity/habit_stats.dart';
@@ -26,21 +26,13 @@ part 'home/sheet/create_category_dialog.dart';
 part 'home/sheet/category_input.dart';
 part 'home/day_switcher.dart';
 part 'home/habit_details_page.dart';
-part 'home/details/habit_streak_chart.dart';
 part 'home/details/habit_heatmap.dart';
-part 'home/details/legend_dot.dart';
-part 'home/details/weekly_adherence_chart.dart';
 part 'home/details/note_edit_result.dart';
 part 'home/manage_categories_page.dart';
 part 'home/categories/category_name_dialog.dart';
 part 'home/stats_tab.dart';
-part 'home/stats/stat_card.dart';
-part 'home/stats/achievements_section.dart';
-part 'home/stats/celebration_banner.dart';
 part 'home/stats/completion_line_chart.dart';
 part 'home/stats/completion_bar_chart.dart';
-part 'home/stats/rolling_rate_chart.dart';
-part 'home/stats/weekday_performance_chart.dart';
 part 'home/track_tab.dart';
 part 'home/track/category_filter_bar.dart';
 part 'home/track/habit_tile.dart';
@@ -142,24 +134,30 @@ class _HabitsHomePageState extends ConsumerState<HabitsHomePage> {
       appBar: AppBar(
         title: const Text(AppStrings.appTitle),
         actions: [
-          _DaySwitcher(
-            date: selectedDate,
-            onPrevious: () {
-              ref.read(selectedDateProvider.notifier).state = normalizeDate(
-                selectedDate.subtract(const Duration(days: 1)),
-              );
-            },
-            onNext: () {
-              ref.read(selectedDateProvider.notifier).state = normalizeDate(
-                selectedDate.add(const Duration(days: 1)),
-              );
-            },
-            onToday: () {
-              ref.read(selectedDateProvider.notifier).state = normalizeDate(
-                DateTime.now(),
-              );
-            },
-          ),
+          if (_selectedTab == 0)
+            _DaySwitcher(
+              date: selectedDate,
+              onPrevious: () {
+                ref.read(selectedDateProvider.notifier).state = normalizeDate(
+                  selectedDate.subtract(const Duration(days: 1)),
+                );
+              },
+              onNext: () {
+                ref.read(selectedDateProvider.notifier).state = normalizeDate(
+                  selectedDate.add(const Duration(days: 1)),
+                );
+              },
+              onToday: () {
+                ref.read(selectedDateProvider.notifier).state = normalizeDate(
+                  DateTime.now(),
+                );
+              },
+              onPickDate: (pickedDate) {
+                ref.read(selectedDateProvider.notifier).state = normalizeDate(
+                  pickedDate,
+                );
+              },
+            ),
         ],
       ),
       body: categoriesBootstrap.when(

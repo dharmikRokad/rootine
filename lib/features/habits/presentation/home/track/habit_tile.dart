@@ -4,8 +4,10 @@ class _HabitTile extends StatelessWidget {
   const _HabitTile({
     required this.habit,
     required this.isDone,
+    this.hasNote = false,
     this.categoryName,
     required this.onChanged,
+    required this.onReflection,
     required this.onDetails,
     required this.onEdit,
     required this.onArchive,
@@ -14,8 +16,10 @@ class _HabitTile extends StatelessWidget {
 
   final Habit habit;
   final bool isDone;
+  final bool hasNote;
   final String? categoryName;
   final ValueChanged<bool> onChanged;
+  final VoidCallback onReflection;
   final VoidCallback onDetails;
   final VoidCallback onEdit;
   final VoidCallback onArchive;
@@ -100,7 +104,16 @@ class _HabitTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                IconButton(
+                  tooltip: 'Reflection Note',
+                  icon: Icon(
+                    hasNote ? Icons.rate_review : Icons.rate_review_outlined,
+                    color: hasNote
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                  onPressed: onReflection,
+                ),
                 Icon(
                   Icons.chevron_right,
                   color: theme.colorScheme.onSurfaceVariant,

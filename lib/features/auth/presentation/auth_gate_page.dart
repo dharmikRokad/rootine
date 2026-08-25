@@ -56,27 +56,17 @@ class _SignInPage extends ConsumerWidget {
     final isLoading = ref.watch(signInLoadingProvider);
     final errorMessage = ref.watch(signInErrorProvider);
 
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: Theme.of(context).brightness == Brightness.light
-                ? [
-                    AppColors.authGradientStart,
-                    AppColors.authGradientMid,
-                    AppColors.authGradientEnd,
-                  ]
-                : [
-                    Theme.of(context).colorScheme.surface,
-                    Theme.of(context).colorScheme.surfaceVariant,
-                    Theme.of(context).colorScheme.surface,
-                  ],
-          ),
+    return Stack(
+      children: [
+        Image.asset(
+          AppImages.authBg,
+          fit: BoxFit.fill,
+          width: double.infinity,
+          height: double.infinity,
         ),
-        child: SafeArea(
-          child: Center(
+        Scaffold(
+          backgroundColor: AppColors.transparent,
+          body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -93,16 +83,26 @@ class _SignInPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    AppStrings.welcomeToRootine,
-                    style: Theme.of(context).textTheme.headlineSmall,
+                    AppStrings.welcomeTo,
+                    style: Theme.of(context).textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    AppStrings.nijDarshan,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineMedium?.copyWith(fontWeight: .bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Divider(),
                   const SizedBox(height: 8),
                   const Text(
                     AppStrings.welcomeSubtitle,
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 20),
+                  Spacer(),
                   if (errorMessage != null) ...[
                     Container(
                       padding: const EdgeInsets.all(12),
@@ -141,7 +141,7 @@ class _SignInPage extends ConsumerWidget {
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

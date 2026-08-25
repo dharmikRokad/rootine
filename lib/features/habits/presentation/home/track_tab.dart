@@ -8,7 +8,15 @@ class _TrackTab extends ConsumerWidget {
     final date = ref.watch(selectedDateProvider);
     final dueHabitsValue = ref.watch(dueHabitsForSelectedDateProvider);
     final completedValue = ref.watch(completionSetForSelectedDateProvider);
+    final completionsValue = ref.watch(completionsProvider);
     final categoryById = ref.watch(categoryByIdProvider);
+
+    final completionMap = <String, HabitCompletion>{};
+    for (final c in completionsValue.value ?? const <HabitCompletion>[]) {
+      if (dateKey(c.date) == dateKey(date)) {
+        completionMap[c.habitId] = c;
+      }
+    }
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -50,9 +58,14 @@ class _TrackTab extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       final habit = habits[index];
                       final isDone = completedIds.contains(habit.id);
+                      final existingCompletion = completionMap[habit.id];
+                      final hasNote =
+                          (existingCompletion?.note ?? '').trim().isNotEmpty;
+
                       return _HabitTile(
                         habit: habit,
                         isDone: isDone,
+                        hasNote: hasNote,
                         categoryName: categoryById[habit.categoryId]?.name,
                         onChanged: (value) {
                           ref
@@ -61,8 +74,17 @@ class _TrackTab extends ConsumerWidget {
                                 habitId: habit.id,
                                 date: date,
                                 isDone: value,
+                                note: existingCompletion?.note,
                               );
                         },
+                        onReflection: () => _openReflectionSheet(
+                          context,
+                          ref,
+                          habit,
+                          date,
+                          isDone,
+                          existingCompletion?.note,
+                        ),
                         onDetails: () => _openDetails(context, habit, date),
                         onEdit: () => _openEditHabitSheet(context, habit),
                         onArchive: () async {
@@ -91,6 +113,109 @@ class _TrackTab extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openReflectionSheet(
+    BuildContext context,
+    WidgetRef ref,
+    Habit habit,
+    DateTime date,
+    bool initialIsDone,
+    String? initialNote,
+  ) async {
+    var isAccomplished = initialIsDone;
+    final controller = TextEditingController(text: initialNote ?? '');
+    final dateFormat = DateFormat('EEE, d MMM yyyy');
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        final media = MediaQuery.of(sheetContext);
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: media.viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Daily Reflection - ${habit.name}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    dateFormat.format(date),
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: Text(
+                      isAccomplished
+                          ? 'Accomplished (Checked)'
+                          : 'Not Accomplished',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    subtitle: Text(
+                      isAccomplished
+                          ? 'Marked as completed for today'
+                          : 'Not completed yet today',
+                    ),
+                    value: isAccomplished,
+                    onChanged: (val) {
+                      setState(() {
+                        isAccomplished = val;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: controller,
+                    minLines: 3,
+                    maxLines: 5,
+                    decoration: const InputDecoration(
+                      labelText: 'Reflection Notes',
+                      hintText:
+                          'Write reflections on why it was accomplished or what prevented it...',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      icon: const Icon(Icons.check),
+                      label: const Text('Save Reflection'),
+                      onPressed: () async {
+                        final text = controller.text.trim();
+                        await ref.read(habitActionsProvider).setCompleted(
+                              habitId: habit.id,
+                              date: date,
+                              isDone: isAccomplished,
+                              note: text.isEmpty ? null : text,
+                            );
+                        if (sheetContext.mounted) {
+                          Navigator.of(sheetContext).pop();
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+    controller.dispose();
   }
 
   Future<void> _openEditHabitSheet(BuildContext context, Habit habit) async {

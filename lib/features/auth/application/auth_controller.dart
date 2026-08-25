@@ -43,7 +43,10 @@ class AuthActions {
       return;
     }
 
-    await _googleSignIn.initialize();
+    await _googleSignIn.initialize(
+      serverClientId:
+          '373360261694-lp4r5fdg5nk51vdgtj70n7p3t43g7ijc.apps.googleusercontent.com',
+    );
     ref.read(_googleInitializedProvider.notifier).state = true;
   }
 

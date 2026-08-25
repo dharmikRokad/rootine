@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/date_helpers.dart';
 import '../domain/entity/habit.dart';
 import '../domain/entity/habit_category.dart';
-import '../domain/service/habit_stats_service.dart';
 import '../data/habit_repository.dart';
 import 'habit_providers.dart';
 
@@ -139,15 +138,5 @@ class HabitActions {
 
   Future<void> deleteCategory(String categoryId) {
     return _repository.deleteCategory(categoryId);
-  }
-
-  Future<void> markAchievementsCelebrated(
-    String scope,
-    List<String> achievementIds,
-  ) {
-    final keys = achievementIds
-        .map((id) => HabitStatsService.scopedAchievementKey(scope, id))
-        .toList();
-    return _repository.markAchievementsCelebrated(keys);
   }
 }

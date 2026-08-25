@@ -16,7 +16,8 @@ class AppStrings {
       'Could not delete account: $error';
   static const signInWithGoogle = 'Sign in with Google';
   static const signingIn = 'Signing in...';
-  static const welcomeToRootine = 'Welcome to Rootine';
+  static const welcomeTo = 'Welcome to';
+  static const nijDarshan = 'Nij Darshan';
   static const welcomeSubtitle =
       'Build streaks, track consistency, and sync your progress securely with Firebase.';
   static const authenticationError = 'Authentication error';
@@ -147,8 +148,8 @@ class AppStrings {
   static String noteForDateLabel(String date) => 'Note for $date';
   static String checkInsLabel(int count) => '$count check-ins';
 
-  static const currentStreak = 'Current Streak';
-  static const bestStreak = 'Best Streak (30-day window)';
+  static const currentStreak = 'Current\nStreak';
+  static const bestStreak = 'Best Streak';
   static const last30DaysAdherence = 'Last 30 Days Adherence';
   static const streakHistory30Days = 'Streak History (30 days)';
   static const streakHistory30DaysDesc =
