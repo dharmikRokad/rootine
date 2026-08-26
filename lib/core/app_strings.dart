@@ -17,7 +17,7 @@ class AppStrings {
   static const signInWithGoogle = 'Sign in with Google';
   static const signingIn = 'Signing in...';
   static const welcomeTo = 'Welcome to';
-  static const nijDarshan = 'Nij Darshan';
+  static const nijDarshan = 'Rootine';
   static const welcomeSubtitle =
       'Build streaks, track consistency, and sync your progress securely with Firebase.';
   static const authenticationError = 'Authentication error';
